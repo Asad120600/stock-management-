@@ -2,36 +2,55 @@ import 'package:flutter/material.dart';
 import 'package:stock_managment/screen_util.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 
-class ListCategoriesScreen extends StatelessWidget {
+class ListCategoriesScreen extends StatefulWidget {
   const ListCategoriesScreen({super.key});
+
+  @override
+  _ListCategoriesScreenState createState() => _ListCategoriesScreenState();
+}
+
+class _ListCategoriesScreenState extends State<ListCategoriesScreen> {
+  final List<Map<String, String>> _categories = [
+    {"name": "Pizza", "description": "Pizza Ingredients"},
+    {"name": "Burger", "description": "Burger Ingredients"},
+    {"name": "Pasta", "description": "Pasta Ingredients"},
+    {"name": "Salad", "description": "Salad Ingredients"},
+  ];
+
+  String _searchQuery = "";
 
   @override
   Widget build(BuildContext context) {
     // Initialize ScreenUtil for responsiveness
     ScreenUtil.init(context);
 
+    // Filtered list of categories based on search query
+    List<Map<String, String>> filteredCategories = _categories
+        .where((category) => category['name']!
+        .toLowerCase()
+        .contains(_searchQuery.toLowerCase()))
+        .toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           "List Categories",
           style: TextStyle(
-            fontSize: ScreenUtil.setSp(18), // Responsive text size
+            fontSize: ScreenUtil.setSp(18),
           ),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications),
+            icon: const Icon(Icons.notifications),
             onPressed: () {
               // Handle notification icon press
             },
           ),
         ],
       ),
-      drawer:AppDrawer(),
+      drawer: const AppDrawer(),
       body: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: ScreenUtil.setWidth(16),
-        ),
+        padding: EdgeInsets.symmetric(horizontal: ScreenUtil.setWidth(16)),
         child: Column(
           children: [
             // Search bar
@@ -40,19 +59,24 @@ class ListCategoriesScreen extends StatelessWidget {
               child: TextFormField(
                 decoration: InputDecoration(
                   hintText: "Search",
-                  prefixIcon: Icon(Icons.search),
+                  prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0), // Added border radius for the search bar
+                    borderRadius: BorderRadius.circular(8.0),
                   ),
                 ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
               ),
             ),
             // Category cards with alternating background colors
             Expanded(
               child: ListView.builder(
-                itemCount: 4, // Simulating four items
+                itemCount: filteredCategories.length,
                 itemBuilder: (context, index) {
-                  return _buildCategoryCard(index);
+                  return _buildCategoryCard(index, filteredCategories);
                 },
               ),
             ),
@@ -63,33 +87,33 @@ class ListCategoriesScreen extends StatelessWidget {
   }
 
   // Helper method to build each category card with alternating color styling
-  Widget _buildCategoryCard(int index) {
-    // Interchanging colors: even index - one color, odd index - another color
+  Widget _buildCategoryCard(int index, List<Map<String, String>> categories) {
     Color cardColor = (index % 2 == 0) ? const Color(0xFFEDECEC) : const Color(0xFFDFC8FF);
+    Map<String, String> category = categories[index];
 
     return Container(
       decoration: BoxDecoration(
-        color: cardColor, // Alternating background colors
-        borderRadius: BorderRadius.circular(8), // Rounded corners for category card
+        color: cardColor,
+        borderRadius: BorderRadius.circular(8),
       ),
       margin: EdgeInsets.only(bottom: ScreenUtil.setHeight(16)),
       child: ListTile(
-        contentPadding: EdgeInsets.all(ScreenUtil.setWidth(16)), // Adjust padding inside the tile
+        contentPadding: EdgeInsets.all(ScreenUtil.setWidth(16)),
         title: Text(
-          "Category Name: Pizza",
+          "Category Name: ${category['name']}",
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: ScreenUtil.setSp(16), // Adjust text size
-            color: const Color(0xFF54357E), // Primary color similar to your theme
+            fontSize: ScreenUtil.setSp(16),
+            color: const Color(0xFF54357E),
           ),
         ),
         subtitle: Text(
-          "Description: Pizza Ingredients",
+          "Description: ${category['description']}",
           style: TextStyle(fontSize: ScreenUtil.setSp(14)),
         ),
         trailing: Icon(
           Icons.more_vert,
-          color: Colors.grey[600], // Trailing icon color to match the theme
+          color: Colors.grey[600],
         ),
       ),
     );

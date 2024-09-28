@@ -227,7 +227,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ),
-        SizedBox(height: ScreenUtil.setHeight(10)),
+        SizedBox(height: ScreenUtil.setHeight(15)),
         SizedBox(
           width: double.infinity,
           height: ScreenUtil.setHeight(50),

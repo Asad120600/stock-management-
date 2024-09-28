@@ -49,7 +49,7 @@ class _ListSupplierScreenState extends State<ListSupplierScreen> {
           ),
         ],
       ),
-      drawer: AppDrawer(),
+      drawer: const AppDrawer(),
       body: Padding(
         padding: EdgeInsets.all(ScreenUtil.setWidth(16)),
         child: Column(
@@ -58,7 +58,7 @@ class _ListSupplierScreenState extends State<ListSupplierScreen> {
             TextFormField(
               controller: searchController,
               decoration: InputDecoration(
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
                 labelText: 'Search',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(ScreenUtil.setWidth(20)),
@@ -156,7 +156,7 @@ class _ListSupplierScreenState extends State<ListSupplierScreen> {
                           ],
                         ),
                         trailing: IconButton(
-                          icon: Icon(Icons.more_vert),
+                          icon: const Icon(Icons.more_vert),
                           onPressed: () {
                             // Handle more options press
                           },

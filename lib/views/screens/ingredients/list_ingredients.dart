@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:stock_managment/screen_util.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 
-class ListIngredientsScreen extends StatelessWidget {
+class ListIngredientsScreen extends StatefulWidget {
   const ListIngredientsScreen({super.key});
 
+  @override
+  State<ListIngredientsScreen> createState() => _ListIngredientsScreenState();
+}
+
+class _ListIngredientsScreenState extends State<ListIngredientsScreen> {
   @override
   Widget build(BuildContext context) {
     // Initialize ScreenUtil for responsiveness
@@ -20,14 +25,14 @@ class ListIngredientsScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications),
+            icon: const Icon(Icons.notifications),
             onPressed: () {
               // Handle notification icon press
             },
           ),
         ],
       ),
-      drawer: AppDrawer(),
+      drawer: const AppDrawer(),
       body: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: ScreenUtil.setWidth(16),
@@ -38,7 +43,7 @@ class ListIngredientsScreen extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(vertical: ScreenUtil.setHeight(16)),
               child: TextFormField(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: "Search",
                   prefixIcon: Icon(Icons.search),
                   border: OutlineInputBorder(),
@@ -50,7 +55,7 @@ class ListIngredientsScreen extends StatelessWidget {
               child: ListView.builder(
                 itemCount: 3, // Simulating three items
                 itemBuilder: (context, index) {
-                  return _buildIngredientCard(index);
+                  return _buildIngredientCard(context, index);
                 },
               ),
             ),
@@ -61,7 +66,7 @@ class ListIngredientsScreen extends StatelessWidget {
   }
 
   // Helper method to build each ingredient card with alternating color styling
-  Widget _buildIngredientCard(int index) {
+  Widget _buildIngredientCard(BuildContext context, int index) {
     // Interchanging colors: even index - one color, odd index - another color
     Color cardColor = (index % 2 == 0) ? const Color(0xFFEDECEC) : const Color(0xFFDFC8FF);
 
@@ -99,9 +104,42 @@ class ListIngredientsScreen extends StatelessWidget {
             ),
           ],
         ),
-        trailing: Icon(
-          Icons.more_vert,
-          color: Colors.grey[600], // Trailing icon color to match the theme
+        trailing: PopupMenuButton<int>(
+          icon: Icon(
+            Icons.more_vert,
+            color: Colors.grey[600], // Trailing icon color to match the theme
+          ),
+          onSelected: (value) {
+            if (value == 1) {
+              // Handle edit action
+              print('Edit tapped');
+            } else if (value == 2) {
+              // Handle delete action
+              print('Delete tapped');
+            }
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 1,
+              child: Row(
+                children: const [
+                  Icon(Icons.edit, color: Colors.black54),
+                  SizedBox(width: 8),
+                  Text("Edit"),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 2,
+              child: Row(
+                children: const [
+                  Icon(Icons.delete, color: Colors.black54),
+                  SizedBox(width: 8),
+                  Text("Delete"),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

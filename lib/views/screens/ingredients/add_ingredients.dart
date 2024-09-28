@@ -3,8 +3,22 @@ import 'package:stock_managment/screen_util.dart';
 import 'package:stock_managment/widgets/button.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 
-class AddIngredientScreen extends StatelessWidget {
+class AddIngredientScreen extends StatefulWidget {
   const AddIngredientScreen({super.key});
+
+  @override
+  _AddIngredientScreenState createState() => _AddIngredientScreenState();
+}
+
+class _AddIngredientScreenState extends State<AddIngredientScreen> {
+  // Dropdown selected values
+  String? selectedCategory;
+  String? selectedPurchaseUnit;
+  String? selectedConsumeUnit;
+
+  // Dropdown options
+  final List<String> categories = ['Fish', 'Fruit', 'Meat', 'Oil'];
+  final List<String> units = ['L', 'ml', 'g', 'Kg'];
 
   @override
   Widget build(BuildContext context) {
@@ -21,14 +35,14 @@ class AddIngredientScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications),
+            icon: const Icon(Icons.notifications),
             onPressed: () {
               // Handle notification icon press
             },
           ),
         ],
       ),
-      drawer: AppDrawer(),
+      drawer: const AppDrawer(),
       body: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: ScreenUtil.setWidth(16),
@@ -54,22 +68,42 @@ class AddIngredientScreen extends StatelessWidget {
                     SizedBox(height: ScreenUtil.setHeight(16)),
                     _buildTextField(label: "Code"),
                     SizedBox(height: ScreenUtil.setHeight(16)),
-                    _buildDropdownField(label: "Category *"),
+
+                    // Category Dropdown
+                    _buildCategoryDropdown(label: "Category *"),
+
                     SizedBox(height: ScreenUtil.setHeight(16)),
 
-                    // Row for Purchase Unit and Consume Unit
+                    // Row for Purchase Unit and Consume Unit Dropdowns
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: _buildDropdownField(label: "Purchase Unit *"),
+                          child: _buildUnitDropdown(
+                            label: "Purchase Unit *",
+                            selectedValue: selectedPurchaseUnit,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedPurchaseUnit = value;
+                              });
+                            },
+                          ),
                         ),
                         SizedBox(width: ScreenUtil.setWidth(8)), // Space between dropdowns
                         Expanded(
-                          child: _buildDropdownField(label: "Consume Unit *"),
+                          child: _buildUnitDropdown(
+                            label: "Consume Unit *",
+                            selectedValue: selectedConsumeUnit,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedConsumeUnit = value;
+                              });
+                            },
+                          ),
                         ),
                       ],
                     ),
+
                     SizedBox(height: ScreenUtil.setHeight(16)),
                     _buildTextField(label: "Conversion Rate *"),
                     SizedBox(height: ScreenUtil.setHeight(16)),
@@ -87,6 +121,7 @@ class AddIngredientScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+
                     SizedBox(height: ScreenUtil.setHeight(16)),
                     _buildTextField(label: "Low Qty *"),
                     SizedBox(height: ScreenUtil.setHeight(30)),
@@ -136,8 +171,8 @@ class AddIngredientScreen extends StatelessWidget {
     );
   }
 
-  // Helper method to build dropdown fields
-  Widget _buildDropdownField({required String label}) {
+  // Helper method to build Category dropdown field
+  Widget _buildCategoryDropdown({required String label}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -155,15 +190,54 @@ class AddIngredientScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(8.0), // Added border radius
             ),
           ),
-          items: <String>['Option 1', 'Option 2', 'Option 3'].map((String value) {
+          value: selectedCategory,
+          items: categories.map((String value) {
             return DropdownMenuItem<String>(
               value: value,
               child: Text(value),
             );
           }).toList(),
           onChanged: (newValue) {
-            // Handle dropdown changes
+            setState(() {
+              selectedCategory = newValue;
+            });
           },
+        ),
+      ],
+    );
+  }
+
+  // Helper method to build Unit dropdown fields for Purchase Unit and Consume Unit
+  Widget _buildUnitDropdown({
+    required String label,
+    required String? selectedValue,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: ScreenUtil.setSp(16),
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF54357E), // Label color set to #54357E
+          ),
+        ),
+        DropdownButtonFormField<String>(
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0), // Added border radius
+            ),
+          ),
+          value: selectedValue,
+          items: units.map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          onChanged: onChanged,
         ),
       ],
     );

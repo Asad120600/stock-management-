@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:stock_managment/screen_util.dart';
 
 class ProductListScreen extends StatefulWidget {
+  const ProductListScreen({super.key});
+
   @override
   _ProductListScreenState createState() => _ProductListScreenState();
 }
@@ -54,7 +56,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
             padding: EdgeInsets.all(ScreenUtil.setWidth(16.0)),
             child: TextField(
               decoration: InputDecoration(
-                prefixIcon: Icon(Icons.search, color: Colors.purple),
+                prefixIcon: const Icon(Icons.search, color: Colors.purple),
                 hintText: "Search",
                 contentPadding: EdgeInsets.symmetric(
                   vertical: ScreenUtil.setHeight(12),
@@ -65,7 +67,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(ScreenUtil.setWidth(12)),
-                  borderSide: BorderSide(color: Colors.purple),
+                  borderSide: const BorderSide(color: Colors.purple),
                 ),
               ),
             ),
@@ -205,11 +207,11 @@ class FilterButton extends StatelessWidget {
   final VoidCallback onTap;
 
   const FilterButton({
-    Key? key,
+    super.key,
     required this.label,
     required this.isSelected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -240,11 +242,11 @@ class ProductItem extends StatelessWidget {
   final String details;
 
   const ProductItem({
-    Key? key,
+    super.key,
     required this.srNo,
     required this.name,
     required this.details,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -297,7 +299,7 @@ class ProductItem extends StatelessWidget {
             Expanded(
               flex: 1,
               child: IconButton(
-                icon: Icon(Icons.more_vert),
+                icon: const Icon(Icons.more_vert),
                 onPressed: () {},
               ),
             ),

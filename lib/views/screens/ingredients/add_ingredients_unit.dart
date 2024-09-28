@@ -21,14 +21,14 @@ class AddIngredientsUnitScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications),
+            icon: const Icon(Icons.notifications),
             onPressed: () {
               // Handle notification icon press
             },
           ),
         ],
       ),
-      drawer: AppDrawer(),
+      drawer: const AppDrawer(),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: ScreenUtil.setWidth(16)),
         child: SingleChildScrollView(

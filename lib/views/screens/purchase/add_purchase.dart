@@ -34,7 +34,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
     ScreenUtil.init(context);
 
     return Scaffold(
-      drawer: AppDrawer(),
+      drawer: const AppDrawer(),
 
       appBar: AppBar(
         centerTitle: true,
@@ -49,12 +49,12 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: const IconThemeData(color: Colors.black),
         actions: [
           Padding(
             padding: EdgeInsets.only(right: ScreenUtil.setWidth(16)),
             child: IconButton(
-              icon: Icon(Icons.notifications_none),
+              icon: const Icon(Icons.notifications_none),
               onPressed: () {},
             ),
           ),
@@ -88,7 +88,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
             ),
             SizedBox(height: ScreenUtil.setHeight(8)),
             TextFormField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
               ),
             ),
@@ -101,13 +101,13 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
                 fontFamily: 'Nunito Sans',
                 fontSize: ScreenUtil.setSp(22),
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF54357E),
+                color: const Color(0xFF54357E),
                 height: 1.36, // line-height
               ),
             ),
             SizedBox(height: ScreenUtil.setHeight(8)),
             TextFormField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
               ),
             ),
@@ -120,13 +120,13 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
                 fontFamily: 'Nunito Sans',
                 fontSize: ScreenUtil.setSp(22),
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF54357E),
+                color: const Color(0xFF54357E),
                 height: 1.36, // line-height
               ),
             ),
             SizedBox(height: ScreenUtil.setHeight(8)),
             TextFormField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
               ),
             ),
@@ -139,13 +139,13 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
                 fontFamily: 'Nunito Sans',
                 fontSize: ScreenUtil.setSp(22),
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF54357E),
+                color: const Color(0xFF54357E),
                 height: 1.36, // line-height
               ),
             ),
             SizedBox(height: ScreenUtil.setHeight(8)),
             TextFormField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
               ),
             ),
@@ -158,14 +158,14 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
                 fontFamily: 'Nunito Sans',
                 fontSize: ScreenUtil.setSp(22),
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF54357E),
+                color: const Color(0xFF54357E),
                 height: 1.36, // line-height
               ),
             ),
             SizedBox(height: ScreenUtil.setHeight(8)),
             TextFormField(
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.attach_money),
                 border: OutlineInputBorder(),
               ),
@@ -179,7 +179,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
                 fontFamily: 'Nunito Sans',
                 fontSize: ScreenUtil.setSp(22),
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF54357E),
+                color: const Color(0xFF54357E),
                 height: 1.36, // line-height
               ),
             ),
@@ -188,7 +188,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
               onTap: () => _selectDate(context),
               child: AbsorbPointer(
                 child: TextFormField(
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     suffixIcon: Icon(Icons.calendar_today),
                   ),

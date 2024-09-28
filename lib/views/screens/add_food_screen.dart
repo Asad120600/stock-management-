@@ -28,7 +28,7 @@ class AddFoodMenuScreen extends StatelessWidget {
           ),
         ],
       ),
-      drawer:AppDrawer(),
+      drawer:const AppDrawer(),
       body: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: ScreenUtil.setWidth(16),
