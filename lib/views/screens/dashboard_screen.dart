@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:stock_managment/screen_util.dart';
+import 'package:stock_managment/views/auth/login_screen.dart';
 import 'package:stock_managment/widgets/button.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 
@@ -52,8 +53,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications),
+            icon: const Icon(Icons.logout),
             onPressed: () {
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginScreen()));
               // Handle notification icon press
             },
           ),

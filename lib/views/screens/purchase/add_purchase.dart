@@ -50,15 +50,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: ScreenUtil.setWidth(16)),
-            child: IconButton(
-              icon: const Icon(Icons.notifications_none),
-              onPressed: () {},
-            ),
-          ),
-        ],
+
       ),
       body: Padding(
         padding: EdgeInsets.all(ScreenUtil.setWidth(16)),

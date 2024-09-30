@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stock_managment/screen_util.dart';
+import 'package:stock_managment/views/auth/login_screen.dart';
 import 'package:stock_managment/widgets/button.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -141,6 +142,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                   SizedBox(height: ScreenUtil.setHeight(20)),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Already have an account?",
+                  style: TextStyle(
+                    fontSize: ScreenUtil.setSp(22),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+                  },
+                  child: Text(
+                    'Login',
+                    style: TextStyle(
+                      color: Colors.purple,
+                      fontSize: ScreenUtil.setSp(20),
+                    ),
+                  ),
+                ),
+              ],
+            ),
                   Row(
                     children: [
                       const Expanded(

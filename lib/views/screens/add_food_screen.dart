@@ -19,14 +19,6 @@ class AddFoodMenuScreen extends StatelessWidget {
             fontSize: ScreenUtil.setSp(18), // Responsive text size
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // Handle notification icon press
-            },
-          ),
-        ],
       ),
       drawer:const AppDrawer(),
       body: Padding(

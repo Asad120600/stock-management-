@@ -19,14 +19,7 @@ class AddIngredientsUnitScreen extends StatelessWidget {
             fontSize: ScreenUtil.setSp(18),
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // Handle notification icon press
-            },
-          ),
-        ],
+
       ),
       drawer: const AppDrawer(),
       body: Padding(

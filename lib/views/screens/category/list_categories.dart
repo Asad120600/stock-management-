@@ -40,14 +40,6 @@ class _ListCategoriesScreenState extends State<ListCategoriesScreen> {
             fontSize: ScreenUtil.setSp(18),
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // Handle notification icon press
-            },
-          ),
-        ],
       ),
       drawer: const AppDrawer(),
       body: Padding(

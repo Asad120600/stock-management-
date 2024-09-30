@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stock_managment/screen_util.dart';
 import 'package:stock_managment/views/auth/signup_screen.dart';
+import 'package:stock_managment/views/screens/dashboard_screen.dart';
 import 'package:stock_managment/widgets/button.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -139,7 +140,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: ScreenUtil.setHeight(50), // Scale button height
                   child: Button(
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>SignUpScreen()));
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>DashboardScreen()));
+
                     },
                     text: ('Log In'),
                   ),
@@ -157,7 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     TextButton(
                       onPressed: () {
-                        // Sign up logic
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>SignUpScreen()));
                       },
                       child: Text(
                         'Sign up',
