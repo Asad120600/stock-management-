@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stock_managment/screen_util.dart';
+import 'package:stock_managment/widgets/drawer.dart';
+import 'package:stock_managment/widgets/popup_menu.dart';
 
 class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
@@ -49,6 +51,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
         centerTitle: true,
         toolbarHeight: ScreenUtil.setHeight(60),
       ),
+      drawer: AppDrawer(),
       body: Column(
         children: [
           // Search bar
@@ -191,6 +194,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   srNo: (index + 1).toString(),
                   name: filteredProducts[index]["name"]!,
                   details: filteredProducts[index]["details"]!,
+                  onEdit: () {
+                    // Handle edit action
+                    print("Edit tapped for ${filteredProducts[index]["name"]}");
+                  },
+                  onDelete: () {
+                    // Handle delete action
+                    print("Delete tapped for ${filteredProducts[index]["name"]}");
+                  },
                 );
               },
             ),
@@ -240,12 +251,16 @@ class ProductItem extends StatelessWidget {
   final String srNo;
   final String name;
   final String details;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   const ProductItem({
     super.key,
     required this.srNo,
     required this.name,
     required this.details,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   @override
@@ -295,12 +310,12 @@ class ProductItem extends StatelessWidget {
               height: ScreenUtil.setHeight(40),
               color: Colors.grey[300],
             ),
-            // Action button
+            // Action button (PopupMenuWidget)
             Expanded(
               flex: 1,
-              child: IconButton(
-                icon: const Icon(Icons.more_vert),
-                onPressed: () {},
+              child: PopupMenuWidget(
+                onEdit: onEdit,
+                onDelete: onDelete,
               ),
             ),
           ],

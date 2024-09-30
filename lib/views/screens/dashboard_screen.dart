@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:stock_managment/screen_util.dart';
+import 'package:stock_managment/widgets/button.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -227,24 +228,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ),
-        SizedBox(height: ScreenUtil.setHeight(15)),
-        SizedBox(
-          width: double.infinity,
-          height: ScreenUtil.setHeight(50),
-          child: ElevatedButton(
-            onPressed: () {
-              // Get report logic
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-            child: Text(
-              'Get Report',
-              style: TextStyle(
-                  fontSize: ScreenUtil.setSp(20),
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white
+        SizedBox(height: ScreenUtil.setHeight(18)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Button(
+                width: ScreenUtil.setWidth(150),
+                onPressed: () {
+                  // Get report logic
+                },
+                text: 'Get Report',
               ),
             ),
-          ),
+            SizedBox(width: ScreenUtil.setWidth(10)), // Adjust space between buttons
+            Expanded(
+              child: Button(
+                width: ScreenUtil.setWidth(150),
+                onPressed: () {
+                  // Download logic
+                },
+                text: 'Download',
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -330,7 +337,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 consumed: '30Kg',
                 remaining: '70Kg',
                 supplier: 'Supplier A',
-                amount: '\$200',
+                amount: '200',
               ),
               const Divider(),
               _buildListItem(
@@ -339,7 +346,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 consumed: '200Kg',
                 remaining: '300Kg',
                 supplier: 'Supplier B',
-                amount: '\$150',
+                amount: '150',
               ),
               const Divider(),
               _buildListItem(
@@ -348,7 +355,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 consumed: '100Kg',
                 remaining: '150Kg',
                 supplier: 'Supplier C',
-                amount: '\$75',
+                amount: '75',
               ),
               const Divider(),
             ],
@@ -418,21 +425,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   // Method to show item details dialog
-  void _showItemDetailsDialog(BuildContext context, String title, String total, String consumed, String remaining, String supplier, String amount) {
+  void _showItemDetailsDialog(
+      BuildContext context,
+      String title,
+      String total,
+      String consumed,
+      String remaining,
+      String supplier,
+      String amount
+      ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Details for $title'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: [
-                Text('Total: $total'),
-                Text('Consumed: $consumed'),
-                Text('Remaining: $remaining'),
-                Text('Supplier: $supplier'), // New supplier detail
-                Text('Amount: $amount'), // New amount detail
-              ],
+          title: Text(
+            'Details for $title',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: SingleChildScrollView(
+              child: ListBody(
+                children: [
+                  _buildDetailRow('Total:', total),
+                  _buildDetailRow('Consumed:', consumed),
+                  _buildDetailRow('Remaining:', remaining),
+                  _buildDetailRow('Supplier:', supplier),
+                  _buildDetailRow('Amount:', amount),
+                ],
+              ),
             ),
           ),
           actions: <Widget>[
@@ -445,6 +466,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          Text(value),
+        ],
+      ),
     );
   }
 }

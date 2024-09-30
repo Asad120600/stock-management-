@@ -5,8 +5,9 @@ import 'package:stock_managment/views/screens/category/list_categories.dart';
 import 'package:stock_managment/views/screens/dashboard_screen.dart';
 import 'package:stock_managment/views/screens/ingredients/add_ingredients.dart';
 import 'package:stock_managment/views/screens/ingredients/add_ingredients_unit.dart';
-import 'package:stock_managment/views/screens/ingredients/ingredients_unit_list.dart';
+import 'package:stock_managment/views/screens/ingredients/list_ingredients_unit.dart';
 import 'package:stock_managment/views/screens/ingredients/list_ingredients.dart';
+import 'package:stock_managment/views/screens/products_list.dart';
 import 'package:stock_managment/views/screens/purchase/add_purchase.dart';
 import 'package:stock_managment/views/screens/purchase/list_purchases.dart';
 import 'package:stock_managment/views/screens/supplier/add_supplier.dart';
@@ -42,6 +43,12 @@ class AppDrawer extends StatelessWidget {
             icon: Icons.home,
             text: "Home",
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DashboardScreen())),
+          ),
+
+          _createDrawerItem(
+            icon: Icons.add_shopping_cart_outlined,
+            text: "Products List",
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductListScreen())),
           ),
 
           // Purchased Expansion Tile

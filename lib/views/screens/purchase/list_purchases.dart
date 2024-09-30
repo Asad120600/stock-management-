@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stock_managment/screen_util.dart';
 import 'package:stock_managment/widgets/drawer.dart';
+import 'package:stock_managment/widgets/popup_menu.dart';
 
 class ListPurchaseScreen extends StatefulWidget {
   const ListPurchaseScreen({super.key});
@@ -67,7 +68,6 @@ class _ListPurchaseScreenState extends State<ListPurchaseScreen> {
             ),
             SizedBox(height: ScreenUtil.setHeight(16)),
 
-
             // List of purchases
             Expanded(
               child: ListView.builder(
@@ -123,10 +123,15 @@ class _ListPurchaseScreenState extends State<ListPurchaseScreen> {
                             ),
                           ],
                         ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.more_vert),
-                          onPressed: () {
-                            // Handle more options press
+                        trailing: PopupMenuWidget(
+                          onEdit: () {
+                            print('Edit tapped for ');
+                            // Add your edit logic here
+                          },
+                          onDelete: () {
+                            setState(() {
+                            });
+                            print('Delete tapped for ');
                           },
                         ),
                       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stock_managment/screen_util.dart';
+import 'package:stock_managment/widgets/card.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 
 class ListCategoriesScreen extends StatefulWidget {
@@ -71,49 +72,30 @@ class _ListCategoriesScreenState extends State<ListCategoriesScreen> {
                 },
               ),
             ),
-            // Category cards with alternating background colors
+            // Category cards
             Expanded(
               child: ListView.builder(
                 itemCount: filteredCategories.length,
                 itemBuilder: (context, index) {
-                  return _buildCategoryCard(index, filteredCategories);
+                  return CommonListItem(
+                    title: "Category Name: ${filteredCategories[index]['name']}",
+                    subtitle1: "Description: ${filteredCategories[index]['description']}",
+                    onEdit: () {
+                      print('Edit tapped for ${filteredCategories[index]['name']}');
+                      // Add your edit logic here
+                    },
+                    onDelete: () {
+                      setState(() {
+                        // Add delete logic here if needed
+                      });
+                      print('Delete tapped for ${filteredCategories[index]['name']}');
+                    },
+                    index: index,
+                  );
                 },
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  // Helper method to build each category card with alternating color styling
-  Widget _buildCategoryCard(int index, List<Map<String, String>> categories) {
-    Color cardColor = (index % 2 == 0) ? const Color(0xFFEDECEC) : const Color(0xFFDFC8FF);
-    Map<String, String> category = categories[index];
-
-    return Container(
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      margin: EdgeInsets.only(bottom: ScreenUtil.setHeight(16)),
-      child: ListTile(
-        contentPadding: EdgeInsets.all(ScreenUtil.setWidth(16)),
-        title: Text(
-          "Category Name: ${category['name']}",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: ScreenUtil.setSp(16),
-            color: const Color(0xFF54357E),
-          ),
-        ),
-        subtitle: Text(
-          "Description: ${category['description']}",
-          style: TextStyle(fontSize: ScreenUtil.setSp(14)),
-        ),
-        trailing: Icon(
-          Icons.more_vert,
-          color: Colors.grey[600],
         ),
       ),
     );

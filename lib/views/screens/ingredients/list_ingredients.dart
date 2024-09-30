@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stock_managment/screen_util.dart';
 import 'package:stock_managment/widgets/drawer.dart';
+import 'package:stock_managment/widgets/popup_menu.dart';
 
 class ListIngredientsScreen extends StatefulWidget {
   const ListIngredientsScreen({super.key});
@@ -104,42 +105,16 @@ class _ListIngredientsScreenState extends State<ListIngredientsScreen> {
             ),
           ],
         ),
-        trailing: PopupMenuButton<int>(
-          icon: Icon(
-            Icons.more_vert,
-            color: Colors.grey[600], // Trailing icon color to match the theme
-          ),
-          onSelected: (value) {
-            if (value == 1) {
-              // Handle edit action
-              print('Edit tapped');
-            } else if (value == 2) {
-              // Handle delete action
-              print('Delete tapped');
-            }
+        trailing: PopupMenuWidget(
+          onEdit: () {
+            print('Edit tapped for ');
+            // Add your edit logic here
           },
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 1,
-              child: Row(
-                children: const [
-                  Icon(Icons.edit, color: Colors.black54),
-                  SizedBox(width: 8),
-                  Text("Edit"),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 2,
-              child: Row(
-                children: const [
-                  Icon(Icons.delete, color: Colors.black54),
-                  SizedBox(width: 8),
-                  Text("Delete"),
-                ],
-              ),
-            ),
-          ],
+          onDelete: () {
+            setState(() {
+            });
+            print('Delete tapped for ');
+          },
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stock_managment/screen_util.dart';
 import 'package:stock_managment/widgets/drawer.dart';
+import 'package:stock_managment/widgets/popup_menu.dart';
 
 class ListSupplierScreen extends StatefulWidget {
   const ListSupplierScreen({super.key});
@@ -155,10 +156,15 @@ class _ListSupplierScreenState extends State<ListSupplierScreen> {
                             ),
                           ],
                         ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.more_vert),
-                          onPressed: () {
-                            // Handle more options press
+                        trailing: PopupMenuWidget(
+                          onEdit: () {
+                            print('Edit tapped for ');
+                            // Add your edit logic here
+                          },
+                          onDelete: () {
+                            setState(() {
+                            });
+                            print('Delete tapped for ');
                           },
                         ),
                       ),
