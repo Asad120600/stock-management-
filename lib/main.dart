@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stock_managment/views/auth/login_screen.dart';
 import 'package:stock_managment/views/screens/dashboard_screen.dart';
 
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-void main() {
-  runApp(const MyApp());
+  // Initialize SharedPreferences
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  // Start the app with the initialized prefs
+  runApp(MyApp(prefs: prefs));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final SharedPreferences prefs;
 
-  // This widget is the root of your application.
+  const MyApp({super.key, required this.prefs});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -20,8 +27,17 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home:    LoginScreen(),
+      home: _getInitialScreen(), // Determine the initial screen based on login status
     );
   }
-}
 
+  Widget _getInitialScreen() {
+    final token = prefs.getString('token');
+
+    if (token != null && token.isNotEmpty) {
+      return const DashboardScreen();
+    } else {
+      return const LoginScreen();
+    }
+  }
+}

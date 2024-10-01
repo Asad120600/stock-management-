@@ -4,7 +4,7 @@ import 'package:stock_managment/screen_util.dart';
 
 class CommonListItem extends StatefulWidget {
   final String title;
-  final String subtitle1; // Code or Description
+  final String? subtitle1; // Code or Description
   final String? subtitle2; // Category or another detail (optional)
   final String? subtitle3; // Purchased Unit or another detail (optional)
   final VoidCallback onEdit;
@@ -14,7 +14,7 @@ class CommonListItem extends StatefulWidget {
   const CommonListItem({
     super.key,
     required this.title,
-    required this.subtitle1,
+    this.subtitle1,
     this.subtitle2,
     this.subtitle3,
     required this.onEdit,
@@ -49,20 +49,26 @@ class _CommonListItemState extends State<CommonListItem> {
                 color: const Color(0xFF54357E),
               ),
             ),
-            subtitle: Column(
+            subtitle: widget.subtitle1 != null ||
+                widget.subtitle2 != null ||
+                widget.subtitle3 != null
+                ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min, // Ensure height is based on content
               children: [
-                SizedBox(height: ScreenUtil.setHeight(8)),
-                Text(widget.subtitle1, style: TextStyle(fontSize: ScreenUtil.setSp(14))),
-                if (widget.subtitle2 != null) ...[ // Check if subtitle2 is not null
+                if (widget.subtitle1 != null) ...[
+                  SizedBox(height: ScreenUtil.setHeight(8)),
+                  Text(widget.subtitle1!, style: TextStyle(fontSize: ScreenUtil.setSp(14))),
+                ],
+                if (widget.subtitle2 != null) ...[
                   Text(widget.subtitle2!, style: TextStyle(fontSize: ScreenUtil.setSp(14))),
                 ],
-                if (widget.subtitle3 != null) ...[ // Check if subtitle3 is not null
+                if (widget.subtitle3 != null) ...[
                   Text(widget.subtitle3!, style: TextStyle(fontSize: ScreenUtil.setSp(14))),
                 ],
               ],
-            ),
+            )
+                : null,
             trailing: PopupMenuWidget(
               onEdit: widget.onEdit,
               onDelete: widget.onDelete,

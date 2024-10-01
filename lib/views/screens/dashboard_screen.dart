@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:stock_managment/screen_util.dart';
+import 'package:stock_managment/token_service.dart';
 import 'package:stock_managment/views/auth/login_screen.dart';
 import 'package:stock_managment/widgets/button.dart';
 import 'package:stock_managment/widgets/drawer.dart';
@@ -15,6 +16,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   DateTime? _startDate;
   DateTime? _endDate;
+  final TokenService _tokenService = TokenService();
 
   // Function to show Date Picker
   Future<void> _selectDate(BuildContext context, {required bool isStartDate}) async {
@@ -36,6 +38,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  Future<void> _logout() async {
+    // Show confirmation dialog
+    final bool? shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Logout'),
+          content: Text('Are you sure you want to logout?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false); // User chose not to logout
+              },
+              child: Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); // User confirmed logout
+              },
+              child: Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+
+    // If the user confirmed logout
+    if (shouldLogout == true) {
+      await _tokenService.removeToken(); // Remove the token
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()), // Navigate to login screen
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Initialize ScreenUtil with the current context to get screen dimensions
@@ -54,10 +92,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () {
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginScreen()));
-              // Handle notification icon press
-            },
+            onPressed: _logout
           ),
         ],
       ),

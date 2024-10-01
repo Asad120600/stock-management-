@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:stock_managment/screen_util.dart';
+import 'package:stock_managment/token_service.dart';
+import 'package:stock_managment/views/screens/dashboard_screen.dart';
 import 'package:stock_managment/widgets/button.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 
@@ -14,8 +17,63 @@ class AddCategoryScreen extends StatefulWidget {
 
 class _AddCategoryScreenState extends State<AddCategoryScreen> {
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _categoryController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final TokenService _tokenService = TokenService(); // Initialize TokenService
+
+  Future<void> _addCategory() async {
+    final String apiUrl = 'https://stock.cslancer.com/api/food-categories';
+    final token = await _tokenService.getToken();
+
+    if (token == null) {
+      log('Token is null. Please log in to continue.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You need to log in again.')),
+      );
+      return;
+    }
+
+    final Map<String, dynamic> requestBody = {
+      "name": _nameController.text,
+      "description": _descriptionController.text,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // Include token in headers
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode == 201) {
+        log("Category Added: ${_nameController.text}, ${_descriptionController.text}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Category added successfully!')),
+        );
+        _nameController.clear();
+        _descriptionController.clear();
+
+        // Navigate back or refresh the page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => DashboardScreen()),
+        );
+      } else {
+        log("Failed to add category: ${response.body}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add category: ${response.body}')),
+        );
+      }
+    } catch (e) {
+      log('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,18 +118,18 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                   label: "Name",
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
+                      return 'Please enter a Category name';
                     }
                     return null;
                   },
                 ),
                 SizedBox(height: ScreenUtil.setHeight(16)),
                 _buildTextField(
-                  controller: _categoryController,
-                  label: "Category",
+                  controller: _descriptionController,
+                  label: "Description",
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a category';
+                      return 'Please enter a Description';
                     }
                     return null;
                   },
@@ -80,8 +138,8 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                 Button(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      // Handle Add button press
-                      log("Category Added: ${_nameController.text}, ${_categoryController.text}");
+                      // Call the API to add the category
+                      _addCategory();
                     }
                   },
                   text: "Add Category",
@@ -130,7 +188,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   @override
   void dispose() {
     _nameController.dispose();
-    _categoryController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 }

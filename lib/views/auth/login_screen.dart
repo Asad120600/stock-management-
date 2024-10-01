@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stock_managment/screen_util.dart';
 import 'package:stock_managment/views/auth/signup_screen.dart';
 import 'package:stock_managment/views/screens/dashboard_screen.dart';
 import 'package:stock_managment/widgets/button.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,6 +19,72 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isPasswordVisible = false; // Track password visibility
+  bool _isLoading = false; // Track loading state
+
+  Future<void> _login() async {
+    setState(() {
+      _isLoading = true; // Show loading state
+    });
+
+    final url = Uri.parse('https://stock.cslancer.com/api/login');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          "email": _emailController.text,
+          "password": _passwordController.text,
+        }),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+
+        // Check if the 'access_token' key exists
+        if (responseData.containsKey('access_token')) {
+          final accessToken = responseData['access_token'];
+
+          // Store the token using SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('token', accessToken); // Store the access token
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Login successful!')),
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const DashboardScreen()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Access token not found in response')),
+          );
+        }
+      } else {
+        // Handle error response
+        final responseData = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login failed: ${responseData['message'] ?? 'Unknown error'}')),
+        );
+      }
+    } catch (error) {
+      // Handle network or unexpected errors
+      print('Error during login: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An error occurred. Please try again.')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false; // Hide loading state
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,159 +93,157 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body:
-      Stack(
-        children: [
-          // Top-left vector
-          Positioned(
-            top: 0,
-            right: 0,
-            child: Image.asset(
-              'assets/images/Vector 1.png', // Your top-left vector path
-              width: ScreenUtil.setWidth(150), // Adjust size as needed
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [
+            // Top-left vector
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Image.asset(
+                'assets/images/Vector 1.png',
+                width: ScreenUtil.setWidth(150),
+              ),
             ),
-          ),
-          // Bottom-right vector
-          Positioned(
-            bottom: 0,
-            left: 0,
-            child: Image.asset(
-              'assets/images/Vector 2.png', // Your bottom-right vector path
-              width: ScreenUtil.setWidth(150), // Adjust size as needed
+            // Bottom-right vector
+            Positioned(
+              bottom: 0,
+              left: 0,
+              child: Image.asset(
+                'assets/images/Vector 2.png',
+                width: ScreenUtil.setWidth(150),
+              ),
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(left: ScreenUtil.setWidth(24.0),right: ScreenUtil.setWidth(24.0) ), // Scale padding
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: ScreenUtil.setHeight(80)), // Scale height
-                Center(
-                  child: Text(
-                    'Log In',
-                    style: TextStyle(
-                      fontSize: ScreenUtil.setSp(32), // Scale text size
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                SizedBox(height: ScreenUtil.setHeight(50)),
-                Center(
-                  child: Image.asset(
-                    'assets/images/login.png',
-                    height: ScreenUtil.setHeight(150), // Scale image height
-                  ),
-                ),
-                SizedBox(height: ScreenUtil.setHeight(40)),
-                Text(
-                  'Email:',
-                  style: TextStyle(
-                    fontSize: ScreenUtil.setSp(16), // Scale text size
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(height: ScreenUtil.setHeight(8)),
-                TextField(
-                  controller: _emailController, // Use email controller
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.email_outlined, size: ScreenUtil.setSp(24)), // Scale icon size
-                    hintText: 'Enter your email',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(ScreenUtil.setWidth(10.0)), // Scale border radius
-                    ),
-                  ),
-                ),
-                SizedBox(height: ScreenUtil.setHeight(10)),
-                Text(
-                  'Password:',
-                  style: TextStyle(
-                    fontSize: ScreenUtil.setSp(16),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(height: ScreenUtil.setHeight(5)),
-                TextField(
-                  controller: _passwordController, // Use password controller
-                  obscureText: !_isPasswordVisible, // Toggle visibility
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.lock_outline, size: ScreenUtil.setSp(24)),
-                    hintText: 'Enter your password',
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off, // Toggle icon
-                        size: ScreenUtil.setSp(24),
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible; // Toggle password visibility
-                        });
-                      },
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(ScreenUtil.setWidth(10.0)),
-                    ),
-                  ),
-                ),
-                SizedBox(height: ScreenUtil.setHeight(5)),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      // Forgot password logic
-                    },
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: ScreenUtil.setWidth(24.0)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: ScreenUtil.setHeight(80)),
+                  Center(
                     child: Text(
-                      'Forgot Password?',
+                      'Log In',
                       style: TextStyle(
-                        color: Colors.purple,
-                        fontSize: ScreenUtil.setSp(16),
-                        fontWeight: FontWeight.w600,
+                        fontSize: ScreenUtil.setSp(32),
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                ),
-                SizedBox(height: ScreenUtil.setHeight(5)),
-                SizedBox(
-                  width: double.infinity,
-                  height: ScreenUtil.setHeight(50), // Scale button height
-                  child: Button(
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>DashboardScreen()));
-
-                    },
-                    text: ('Log In'),
+                  SizedBox(height: ScreenUtil.setHeight(50)),
+                  Center(
+                    child: Image.asset(
+                      'assets/images/login.png',
+                      height: ScreenUtil.setHeight(150),
+                    ),
                   ),
-                ),
-                SizedBox(height: ScreenUtil.setHeight(8)),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Don't have an account?",
-                      style: TextStyle(
-                        fontSize: ScreenUtil.setSp(22), // Scale text size
-                        fontWeight: FontWeight.w600,
+                  SizedBox(height: ScreenUtil.setHeight(40)),
+                  Text(
+                    'Email:',
+                    style: TextStyle(
+                      fontSize: ScreenUtil.setSp(16),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: ScreenUtil.setHeight(8)),
+                  TextField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.email_outlined, size: ScreenUtil.setSp(24)),
+                      hintText: 'Enter your email',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(ScreenUtil.setWidth(10.0)),
                       ),
                     ),
-                    TextButton(
+                  ),
+                  SizedBox(height: ScreenUtil.setHeight(10)),
+                  Text(
+                    'Password:',
+                    style: TextStyle(
+                      fontSize: ScreenUtil.setSp(16),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: ScreenUtil.setHeight(5)),
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: !_isPasswordVisible,
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.lock_outline, size: ScreenUtil.setSp(24)),
+                      hintText: 'Enter your password',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                          size: ScreenUtil.setSp(24),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(ScreenUtil.setWidth(10.0)),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: ScreenUtil.setHeight(5)),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>SignUpScreen()));
+                        // Forgot password logic can be implemented here
                       },
                       child: Text(
-                        'Sign up',
+                        'Forgot Password?',
                         style: TextStyle(
                           color: Colors.purple,
-                          fontSize: ScreenUtil.setSp(22),
+                          fontSize: ScreenUtil.setSp(16),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
-                  ],
-                ),
-                SizedBox(height: ScreenUtil.setHeight(80)),
-              ],
+                  ),
+                  SizedBox(height: ScreenUtil.setHeight(5)),
+                  SizedBox(
+                    width: double.infinity,
+                    height: ScreenUtil.setHeight(50),
+                    child: Button(
+                      onPressed: _login,
+                      text: _isLoading ? 'Logging in...' : 'Log In',
+                    ),
+                  ),
+                  SizedBox(height: ScreenUtil.setHeight(8)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Don't have an account?",
+                        style: TextStyle(
+                          fontSize: ScreenUtil.setSp(22),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUpScreen()));
+                        },
+                        child: Text(
+                          'Sign up',
+                          style: TextStyle(
+                            color: Colors.purple,
+                            fontSize: ScreenUtil.setSp(22),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: ScreenUtil.setHeight(80)),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
