@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stock_managment/screen_util.dart';
 import 'package:stock_managment/views/auth/signup_screen.dart';
@@ -20,8 +21,36 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _isPasswordVisible = false; // Track password visibility
   bool _isLoading = false; // Track loading state
+  bool _isButtonEnabled = false; // Track if the login button should be enabled
 
+  @override
+  void initState() {
+    super.initState();
+    _emailController.addListener(_validateFields);
+    _passwordController.addListener(_validateFields);
+  }
+
+  void _validateFields() {
+    setState(() {
+      _isButtonEnabled = _emailController.text.isNotEmpty && _passwordController.text.isNotEmpty;
+    });
+  }
+
+
+// Inside your _login() function
   Future<void> _login() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      Fluttertoast.showToast(
+        msg: "Please enter your email and password.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true; // Show loading state
     });
@@ -40,9 +69,6 @@ class _LoginScreenState extends State<LoginScreen> {
         }),
       );
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
 
@@ -50,9 +76,10 @@ class _LoginScreenState extends State<LoginScreen> {
         if (responseData.containsKey('access_token')) {
           final accessToken = responseData['access_token'];
 
-          // Store the token using SharedPreferences
+          // Store the token and email using SharedPreferences
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', accessToken); // Store the access token
+          await prefs.setString('email', _emailController.text); // Store the email
 
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Login successful!')),
@@ -62,22 +89,35 @@ class _LoginScreenState extends State<LoginScreen> {
             MaterialPageRoute(builder: (context) => const DashboardScreen()),
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Access token not found in response')),
+          Fluttertoast.showToast(
+            msg: "Access token not found in response.",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.redAccent,
+            textColor: Colors.white,
+            fontSize: 16.0,
           );
         }
       } else {
         // Handle error response
         final responseData = json.decode(response.body);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed: ${responseData['message'] ?? 'Unknown error'}')),
+        Fluttertoast.showToast(
+          msg: "Login failed: ${responseData['message'] ?? 'Unknown error'}",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.redAccent,
+          textColor: Colors.white,
+          fontSize: 16.0,
         );
       }
     } catch (error) {
-      // Handle network or unexpected errors
-      print('Error during login: $error');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('An error occurred. Please try again.')),
+      Fluttertoast.showToast(
+        msg: "An error occurred. Please try again.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        textColor: Colors.white,
+        fontSize: 16.0,
       );
     } finally {
       setState(() {
@@ -85,6 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -204,15 +245,33 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   SizedBox(height: ScreenUtil.setHeight(5)),
-                  SizedBox(
-                    width: double.infinity,
-                    height: ScreenUtil.setHeight(50),
-                    child: Button(
-                      onPressed: _login,
-                      text: _isLoading ? 'Logging in...' : 'Log In',
+          SizedBox(
+            width: double.infinity,
+            height: ScreenUtil.setHeight(50),
+            child: Button(
+              onPressed: _isButtonEnabled
+                  ? () => _login()
+                  : () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      "Please fill in your credentials.",
+                      style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
                     ),
+                    backgroundColor: Colors.purple, // Customize background color
+                    behavior: SnackBarBehavior.floating, // Makes the SnackBar float
+                    margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0), // Adds margin around the SnackBar
+                    duration: Duration(seconds: 2), // Set the duration of the SnackBar
                   ),
-                  SizedBox(height: ScreenUtil.setHeight(8)),
+                );
+              },
+              text: _isLoading ? 'Logging in...' : 'Log In',
+            ),
+          ),
+
+
+
+          SizedBox(height: ScreenUtil.setHeight(8)),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -246,5 +305,12 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }

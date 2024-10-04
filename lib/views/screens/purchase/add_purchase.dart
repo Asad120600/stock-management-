@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:stock_managment/screen_util.dart';
+import 'package:stock_managment/token_service.dart';
 import 'package:stock_managment/widgets/button.dart';
 import 'package:stock_managment/widgets/drawer.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class AddPurchaseScreen extends StatefulWidget {
   const AddPurchaseScreen({super.key});
@@ -11,9 +14,77 @@ class AddPurchaseScreen extends StatefulWidget {
 }
 
 class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final TokenService _tokenService = TokenService();
+
+  String? _name;
+  int? _supplierId;
+  int? _unitId;
+  double? _quantity;
+  double? _price;
   DateTime selectedDate = DateTime.now();
-  bool purchasedExpanded = false;
-  bool itemsExpanded = false;
+
+  List<dynamic> suppliers = [];
+  List<dynamic> units = [];
+  bool isLoadingSuppliers = true;
+  bool isLoadingUnits = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchSuppliers();
+    fetchUnits();
+  }
+
+  Future<void> fetchSuppliers() async {
+    final token = await _tokenService.getToken();
+    final response = await http.get(
+      Uri.parse('http://stock.cslancer.com/api/suppliers'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        suppliers = json.decode(response.body);
+        isLoadingSuppliers = false;
+      });
+    } else {
+      setState(() {
+        isLoadingSuppliers = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load suppliers')),
+      );
+    }
+  }
+
+  Future<void> fetchUnits() async {
+    final token = await _tokenService.getToken();
+    final response = await http.get(
+      Uri.parse('http://stock.cslancer.com/api/units'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        units = json.decode(response.body);
+        isLoadingUnits = false;
+      });
+    } else {
+      setState(() {
+        isLoadingUnits = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load units')),
+      );
+    }
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -29,16 +100,51 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
     }
   }
 
+  Future<void> addPurchase() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    _formKey.currentState!.save();
+
+    final token = await _tokenService.getToken();
+    final response = await http.post(
+      Uri.parse('http://stock.cslancer.com/api/purchases'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        "supplier_id": _supplierId,
+        "unit_id": _unitId,
+        "quantity": _quantity,
+        "price": _price,
+        "expiration_date": selectedDate.toIso8601String(),
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Purchase added successfully.')),
+      );
+      Navigator.pop(context);
+    } else {
+      final responseBody = json.decode(response.body);
+      print('Failed to add purchase: ${response.statusCode} - ${response.body}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add purchase: ${responseBody['message']}')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
 
     return Scaffold(
       drawer: const AppDrawer(),
-
       appBar: AppBar(
         centerTitle: true,
-
         title: Text(
           'Add Purchase',
           style: TextStyle(
@@ -50,152 +156,144 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
-
       ),
       body: Padding(
         padding: EdgeInsets.all(ScreenUtil.setWidth(16)),
-        child: ListView(
-          children: [
-            Text(
-              'Add Your Purchase With Details Here!',
-              style: TextStyle(
-                fontSize: ScreenUtil.setSp(20),
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF54357E),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              Text(
+                'Add Your Purchase With Details Here!',
+                style: TextStyle(
+                  fontSize: ScreenUtil.setSp(20),
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF54357E),
+                ),
+                textAlign: TextAlign.left,
               ),
-              textAlign: TextAlign.left,
-            ),
-            SizedBox(height: ScreenUtil.setHeight(16)),
+              SizedBox(height: ScreenUtil.setHeight(16)),
 
-            // Name field
-            Text(
-              'Name:',
-              style: TextStyle(
-                fontFamily: 'Nunito Sans',
-                fontSize: ScreenUtil.setSp(22),
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF54357E),
-                height: 1.36, // line-height
+              // Name field
+              _buildLabel('Name:'),
+              TextFormField(
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                validator: (value) => value == null || value.isEmpty ? 'Please enter a name' : null,
+                onSaved: (value) => _name = value,
               ),
-            ),
-            SizedBox(height: ScreenUtil.setHeight(8)),
-            TextFormField(
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: ScreenUtil.setHeight(16)),
+              SizedBox(height: ScreenUtil.setHeight(16)),
 
-            // Supplier field
-            Text(
-              'Supplier:',
-              style: TextStyle(
-                fontFamily: 'Nunito Sans',
-                fontSize: ScreenUtil.setSp(22),
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF54357E),
-                height: 1.36, // line-height
+              // Supplier dropdown
+              _buildLabel('Supplier:'),
+              isLoadingSuppliers
+                  ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(strokeWidth: 2.0),
+              )
+                  : DropdownButtonFormField<int>(
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                items: suppliers.map<DropdownMenuItem<int>>((supplier) {
+                  return DropdownMenuItem<int>(
+                    value: supplier['id'],
+                    child: Text(supplier['name']),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _supplierId = value;
+                  });
+                },
+                validator: (value) => value == null ? 'Please select a supplier' : null,
+                onSaved: (value) => _supplierId = value,
               ),
-            ),
-            SizedBox(height: ScreenUtil.setHeight(8)),
-            TextFormField(
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: ScreenUtil.setHeight(16)),
+              SizedBox(height: ScreenUtil.setHeight(16)),
 
-            // Unit of measurement
-            Text(
-              'Unit of Measurement:',
-              style: TextStyle(
-                fontFamily: 'Nunito Sans',
-                fontSize: ScreenUtil.setSp(22),
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF54357E),
-                height: 1.36, // line-height
+              // Unit dropdown
+              _buildLabel('Unit of Measurement:'),
+              isLoadingUnits
+                  ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(strokeWidth: 2.0),
+              )
+                  : DropdownButtonFormField<int>(
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                items: units.map<DropdownMenuItem<int>>((unit) {
+                  return DropdownMenuItem<int>(
+                    value: unit['id'],
+                    child: Text(unit['name']),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _unitId = value;
+                  });
+                },
+                validator: (value) => value == null ? 'Please select a unit' : null,
+                onSaved: (value) => _unitId = value,
               ),
-            ),
-            SizedBox(height: ScreenUtil.setHeight(8)),
-            TextFormField(
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: ScreenUtil.setHeight(16)),
+              SizedBox(height: ScreenUtil.setHeight(16)),
 
-            // Quantity field
-            Text(
-              'Quantity:',
-              style: TextStyle(
-                fontFamily: 'Nunito Sans',
-                fontSize: ScreenUtil.setSp(22),
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF54357E),
-                height: 1.36, // line-height
+              // Quantity field
+              _buildLabel('Quantity:'),
+              TextFormField(
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                keyboardType: TextInputType.number,
+                validator: (value) => value == null || value.isEmpty ? 'Please enter a quantity' : null,
+                onSaved: (value) => _quantity = double.tryParse(value!),
               ),
-            ),
-            SizedBox(height: ScreenUtil.setHeight(8)),
-            TextFormField(
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: ScreenUtil.setHeight(16)),
+              SizedBox(height: ScreenUtil.setHeight(16)),
 
-            // Purchase Price field
-            Text(
-              'Purchase Price:',
-              style: TextStyle(
-                fontFamily: 'Nunito Sans',
-                fontSize: ScreenUtil.setSp(22),
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF54357E),
-                height: 1.36, // line-height
+              // Purchase Price field
+              _buildLabel('Purchase Price:'),
+              TextFormField(
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.attach_money),
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) => value == null || value.isEmpty ? 'Please enter a price' : null,
+                onSaved: (value) => _price = double.tryParse(value!),
               ),
-            ),
-            SizedBox(height: ScreenUtil.setHeight(8)),
-            TextFormField(
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.attach_money),
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: ScreenUtil.setHeight(16)),
+              SizedBox(height: ScreenUtil.setHeight(16)),
 
-            // Expiration Date picker
-            Text(
-              'Expiration Date:',
-              style: TextStyle(
-                fontFamily: 'Nunito Sans',
-                fontSize: ScreenUtil.setSp(22),
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF54357E),
-                height: 1.36, // line-height
-              ),
-            ),
-            SizedBox(height: ScreenUtil.setHeight(8)),
-            GestureDetector(
-              onTap: () => _selectDate(context),
-              child: AbsorbPointer(
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    suffixIcon: Icon(Icons.calendar_today),
-                  ),
-                  controller: TextEditingController(
-                    text: "${selectedDate.toLocal()}".split(' ')[0],
+              // Expiration Date picker
+              _buildLabel('Expiration Date:'),
+              GestureDetector(
+                onTap: () => _selectDate(context),
+                child: AbsorbPointer(
+                  child: TextFormField(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      suffixIcon: Icon(Icons.calendar_today),
+                    ),
+                    controller: TextEditingController(
+                      text: "${selectedDate.toLocal()}".split(' ')[0],
+                    ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: ScreenUtil.setHeight(32)),
+              SizedBox(height: ScreenUtil.setHeight(32)),
 
-            // Add Purchase Button
-            Button(onPressed: () {}, text: 'Add Purchase')
-          ],
+              // Add Purchase Button
+              Button(onPressed: addPurchase, text: 'Add Purchase'),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildLabel(String label) {
+    return Text(
+      label,
+      style: TextStyle(
+        fontFamily: 'Nunito Sans',
+        fontSize: ScreenUtil.setSp(22),
+        fontWeight: FontWeight.w700,
+        color: const Color(0xFF54357E),
+        height: 1.36,
       ),
     );
   }

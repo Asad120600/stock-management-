@@ -7,18 +7,23 @@ import 'package:stock_managment/widgets/button.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 import 'package:stock_managment/views/screens/dashboard_screen.dart'; // Import DashboardScreen
 
-class AddSupplierScreen extends StatelessWidget {
+class AddSupplierScreen extends StatefulWidget {
   const AddSupplierScreen({super.key});
+
+  @override
+  _AddSupplierScreenState createState() => _AddSupplierScreenState();
+}
+
+class _AddSupplierScreenState extends State<AddSupplierScreen> {
+  // TextEditingControllers for the input fields
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController contactController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     // Initialize ScreenUtil for responsiveness
     ScreenUtil.init(context);
-
-    // TextEditingControllers for the input fields
-    final TextEditingController nameController = TextEditingController();
-    final TextEditingController contactController = TextEditingController();
-    final TextEditingController emailController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
@@ -162,5 +167,14 @@ class AddSupplierScreen extends StatelessWidget {
         SnackBar(content: Text('Failed to add supplier: ${response.body}')),
       );
     }
+  }
+
+  @override
+  void dispose() {
+    // Dispose of the controllers when the widget is removed from the widget tree
+    nameController.dispose();
+    contactController.dispose();
+    emailController.dispose();
+    super.dispose();
   }
 }

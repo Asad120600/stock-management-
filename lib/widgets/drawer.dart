@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stock_managment/screen_util.dart';
+import 'package:stock_managment/views/screens/add_food_screen.dart';
 import 'package:stock_managment/views/screens/category/add_category.dart';
 import 'package:stock_managment/views/screens/category/list_categories.dart';
 import 'package:stock_managment/views/screens/dashboard_screen.dart';
@@ -46,9 +47,15 @@ class AppDrawer extends StatelessWidget {
           ),
 
           _createDrawerItem(
-            icon: Icons.add_shopping_cart_outlined,
-            text: "Products List",
+            icon: Icons.shopping_cart,
+            text: "Menu List",
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductListScreen())),
+          ),
+
+          _createDrawerItem(
+            icon: Icons.add_shopping_cart_outlined,
+            text: "Add Food Item",
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AddFoodMenuScreen())),
           ),
 
           // Purchased Expansion Tile
@@ -86,7 +93,7 @@ class AppDrawer extends StatelessWidget {
               ),
               _createDrawerItem(
                 text: "List Ingredients",
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ListIngredientsScreen())),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  ListIngredientsScreen())),
               ),
               _createDrawerItem(
                 text: "Add Category",

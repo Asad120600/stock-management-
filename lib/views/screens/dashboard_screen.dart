@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stock_managment/screen_util.dart';
 import 'package:stock_managment/token_service.dart';
 import 'package:stock_managment/views/auth/login_screen.dart';
 import 'package:stock_managment/widgets/button.dart';
 import 'package:stock_managment/widgets/drawer.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // For json decoding
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -14,9 +17,64 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  final TokenService _tokenService = TokenService();
+  String? userName;
+  int totalSuppliers = 0; // Variable to hold the total suppliers count
   DateTime? _startDate;
   DateTime? _endDate;
-  final TokenService _tokenService = TokenService();
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserName();
+    fetchTotalSuppliers(); // Call to fetch total suppliers count
+  }
+
+  Future<void> fetchUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('email'); // Get the email
+    if (email != null && email.isNotEmpty) {
+      setState(() {
+        userName = email.split('@')[0]; // Example: extracting username from email
+      });
+    } else {
+      setState(() {
+        userName = 'User'; // Fallback name if email is null or empty
+      });
+    }
+  }
+
+  Future<void> fetchTotalSuppliers() async {
+    final url = Uri.parse('http://stock.cslancer.com/api/suppliers');
+
+    // Retrieve the token from SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      print("No token found. Please log in first.");
+      return; // Exit if no token is found
+    }
+
+    // Make the GET request to the suppliers API
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token', // Add the token to the headers
+      },
+    );
+
+    if (response.statusCode == 200) {
+      // Parse the response body as JSON
+      final List<dynamic> suppliers = json.decode(response.body);
+      setState(() {
+        totalSuppliers = suppliers.length; // Update totalSuppliers with the length of the list
+      });
+    } else {
+      // Handle error response
+      print('Failed to load suppliers: ${response.statusCode}');
+    }
+  }
 
   // Function to show Date Picker
   Future<void> _selectDate(BuildContext context, {required bool isStartDate}) async {
@@ -44,20 +102,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirm Logout'),
-          content: Text('Are you sure you want to logout?'),
+          title: const Text('Confirm Logout'),
+          content: const Text('Are you sure you want to logout?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(false); // User chose not to logout
               },
-              child: Text('No'),
+              child: const Text('No'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(true); // User confirmed logout
               },
-              child: Text('Yes'),
+              child: const Text('Yes'),
             ),
           ],
         );
@@ -69,7 +127,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       await _tokenService.removeToken(); // Remove the token
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginScreen()), // Navigate to login screen
+        MaterialPageRoute(builder: (context) => const LoginScreen()), // Navigate to login screen
       );
     }
   }
@@ -92,7 +150,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: _logout
+            onPressed: _logout,
           ),
         ],
       ),
@@ -112,7 +170,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
               Text(
-                'Hi, Choudary Aoun',
+                'Hi, ${userName ?? 'User'}', // Dynamic user name display
                 style: TextStyle(
                   fontSize: ScreenUtil.setSp(18),
                   color: Colors.black45,
@@ -131,8 +189,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   _buildStatCard(
                     context,
-                    title: 'Total Supplier',
-                    value: '50',
+                    title: 'Total Suppliers',
+                    value: totalSuppliers.toString(), // Updated to show totalSuppliers
                     icon: Icons.people_outline,
                     color: Colors.purple,
                   ),
@@ -477,7 +535,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return AlertDialog(
           title: Text(
             'Details for $title',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           content: Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -495,7 +553,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Close'),
+              child: const Text('Close'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -514,7 +572,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           Text(
             label,
-            style: TextStyle(fontWeight: FontWeight.w600),
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
           Text(value),
         ],
