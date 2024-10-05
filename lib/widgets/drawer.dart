@@ -8,7 +8,7 @@ import 'package:stock_managment/views/screens/ingredients/add_ingredients.dart';
 import 'package:stock_managment/views/screens/ingredients/add_ingredients_unit.dart';
 import 'package:stock_managment/views/screens/ingredients/list_ingredients_unit.dart';
 import 'package:stock_managment/views/screens/ingredients/list_ingredients.dart';
-import 'package:stock_managment/views/screens/products_list.dart';
+import 'package:stock_managment/views/screens/menu_list.dart';
 import 'package:stock_managment/views/screens/purchase/add_purchase.dart';
 import 'package:stock_managment/views/screens/purchase/list_purchases.dart';
 import 'package:stock_managment/views/screens/supplier/add_supplier.dart';
@@ -46,16 +46,18 @@ class AppDrawer extends StatelessWidget {
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DashboardScreen())),
           ),
 
-          _createDrawerItem(
-            icon: Icons.shopping_cart,
-            text: "Menu List",
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductListScreen())),
-          ),
+
 
           _createDrawerItem(
             icon: Icons.add_shopping_cart_outlined,
-            text: "Add Food Item",
+            text: "Add Menu Item",
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AddFoodMenuScreen())),
+          ),
+
+          _createDrawerItem(
+            icon: Icons.list_alt_sharp,
+            text: "Menu List",
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MenuList())),
           ),
 
           // Purchased Expansion Tile

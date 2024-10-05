@@ -34,12 +34,12 @@ class Button extends StatelessWidget {
           children: [
             if (leadingIcon != null) ...[
               leadingIcon!, // Display icon if it's provided
-              SizedBox(width: ScreenUtil.setWidth(8)), // Add space between icon and text
+              SizedBox(width: ScreenUtil.setWidth(5)), // Add space between icon and text
             ],
             Text(
               text, // Use the customizable text
               style: TextStyle(
-                fontSize: ScreenUtil.setSp(18), // Scale text size
+                fontSize: ScreenUtil.setSp(15), // Scale text size
                 color: Colors.white,
               ),
             ),

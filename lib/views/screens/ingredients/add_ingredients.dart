@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stock_managment/screen_util.dart';
 import 'package:stock_managment/views/screens/dashboard_screen.dart';
 import 'package:stock_managment/widgets/button.dart';
+import 'package:stock_managment/widgets/dots.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -29,6 +30,8 @@ class _AddIngredientScreenState extends State<AddIngredientScreen> {
   final TextEditingController _purchasePriceController = TextEditingController();
   final TextEditingController _costPerUnitController = TextEditingController();
   final TextEditingController _lowQtyController = TextEditingController();
+
+  bool isLoading = false; // Track loading state
 
   @override
   void initState() {
@@ -254,7 +257,9 @@ class _AddIngredientScreenState extends State<AddIngredientScreen> {
                     SizedBox(height: ScreenUtil.setHeight(16)),
                     _buildTextField(controller: _lowQtyController, label: "Low Quantity"),
                     SizedBox(height: ScreenUtil.setHeight(16)),
-                    Button(
+                    isLoading
+                        ? LoadingDots() // Show LoadingDots when loading
+                        : Button(
                       onPressed: _addIngredient,
                       text: "Add Ingredient",
                     ),

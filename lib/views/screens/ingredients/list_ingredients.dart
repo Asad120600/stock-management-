@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:stock_managment/screen_util.dart';
 import 'package:stock_managment/token_service.dart';
 import 'package:stock_managment/widgets/drawer.dart';
@@ -129,8 +130,12 @@ class _ListIngredientsScreenState extends State<ListIngredientsScreen> {
           horizontal: ScreenUtil.setWidth(16),
         ),
         child: isLoading
-            ? Center(child: CircularProgressIndicator())
-            : RefreshIndicator(
+            ? Center(
+          child: SpinKitFadingCircle(
+            color: Colors.purple,
+            size: 50.0,
+          ),
+        ): RefreshIndicator(
           onRefresh: _refreshIngredients,
           child: Column(
             children: [

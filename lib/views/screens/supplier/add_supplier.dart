@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert'; // For jsonEncode
 import 'package:stock_managment/screen_util.dart';
 import 'package:stock_managment/widgets/button.dart';
+import 'package:stock_managment/widgets/dots.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 import 'package:stock_managment/views/screens/dashboard_screen.dart'; // Import DashboardScreen
 
@@ -19,6 +20,9 @@ class _AddSupplierScreenState extends State<AddSupplierScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController contactController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
+
+  // State variable to track loading status
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +75,9 @@ class _AddSupplierScreenState extends State<AddSupplierScreen> {
                     // Add Supplier Button
                     SizedBox(
                       width: double.infinity,
-                      child: Button(
+                      child: isLoading
+                          ? const LoadingDots() // Show LoadingDots while loading
+                          : Button(
                         onPressed: () {
                           // Handle Add Supplier button press
                           addSupplier(
@@ -123,6 +129,10 @@ class _AddSupplierScreenState extends State<AddSupplierScreen> {
     required String email,
     required BuildContext context, // Pass the BuildContext
   }) async {
+    setState(() {
+      isLoading = true;
+    });
+
     final url = Uri.parse('https://stock.cslancer.com/api/suppliers');
 
     // Retrieve the token from SharedPreferences
@@ -132,6 +142,9 @@ class _AddSupplierScreenState extends State<AddSupplierScreen> {
     // Check if token is available
     if (token == null) {
       print("No token found. Please log in first.");
+      setState(() {
+        isLoading = false;
+      });
       return; // Exit if no token is found
     }
 
@@ -148,6 +161,10 @@ class _AddSupplierScreenState extends State<AddSupplierScreen> {
       }),
     );
 
+    setState(() {
+      isLoading = false;
+    });
+
     if (response.statusCode == 200 || response.statusCode == 201) {
       // Success handling, e.g., show a success message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -155,7 +172,7 @@ class _AddSupplierScreenState extends State<AddSupplierScreen> {
       );
 
       // Navigate to DashboardScreen after a short delay
-      Future.delayed(const Duration(seconds: 2), () {
+      Future.delayed(const Duration(seconds: 1), () {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => DashboardScreen()), // Ensure to import the DashboardScreen

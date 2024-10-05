@@ -132,24 +132,6 @@ class _ListCategoriesScreenState extends State<ListCategoriesScreen> {
         padding: EdgeInsets.symmetric(horizontal: ScreenUtil.setWidth(16)),
         child: Column(
           children: [
-            // Search bar
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: ScreenUtil.setHeight(16)),
-              child: TextFormField(
-                decoration: InputDecoration(
-                  hintText: "Search",
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    _searchQuery = value;
-                  });
-                },
-              ),
-            ),
             // Refresh Indicator
             Expanded(
               child: RefreshIndicator(

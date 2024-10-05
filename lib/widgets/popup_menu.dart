@@ -30,16 +30,6 @@ class PopupMenuWidget extends StatelessWidget {
         ),
         itemBuilder: (context) => [
           const PopupMenuItem(
-            value: 1,
-            child: Row(
-              children: [
-                Icon(Icons.edit, color: Colors.black54),
-                SizedBox(width: 8),
-                Text("Edit"),
-              ],
-            ),
-          ),
-          const PopupMenuItem(
             value: 2,
             child: Row(
               children: [

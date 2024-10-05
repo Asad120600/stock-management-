@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http; // Import the http package
 import 'package:stock_managment/screen_util.dart';
 import 'package:stock_managment/widgets/card.dart';
@@ -11,11 +12,11 @@ class ListIngredientsUnitScreen extends StatefulWidget {
   const ListIngredientsUnitScreen({super.key});
 
   @override
-  _ListIngredientsUnitScreenState createState() => _ListIngredientsUnitScreenState();
+  _ListIngredientsUnitScreenState createState() =>
+      _ListIngredientsUnitScreenState();
 }
 
 class _ListIngredientsUnitScreenState extends State<ListIngredientsUnitScreen> {
-  TextEditingController searchController = TextEditingController();
   final TokenService _tokenService = TokenService(); // Initialize TokenService
   List<dynamic> units = []; // This will hold the fetched units
   bool isLoading = true; // For loading state
@@ -36,7 +37,7 @@ class _ListIngredientsUnitScreenState extends State<ListIngredientsUnitScreen> {
     if (token == null) {
       log('Token is null. Please log in to continue.');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('You need to log in again.')),
+        const SnackBar(content: Text('You need to log in again.')),
       );
       setState(() {
         isLoading = false; // Stop loading if token is null
@@ -53,7 +54,7 @@ class _ListIngredientsUnitScreenState extends State<ListIngredientsUnitScreen> {
       );
 
       log('Response status: ${response.statusCode}');
-      log('Response body: ${response.body ?? 'No response'}');
+      log('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final List<dynamic> responseData = jsonDecode(response.body);
@@ -91,7 +92,7 @@ class _ListIngredientsUnitScreenState extends State<ListIngredientsUnitScreen> {
     if (token == null) {
       log('Token is null. Please log in to continue.');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('You need to log in again.')),
+        const SnackBar(content: Text('You need to log in again.')),
       );
       return; // Exit early if token is null
     }
@@ -105,7 +106,7 @@ class _ListIngredientsUnitScreenState extends State<ListIngredientsUnitScreen> {
       );
 
       log('Delete response status: ${response.statusCode}');
-      log('Delete response body: ${response.body ?? 'No response'}');
+      log('Delete response body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         // Successfully deleted, remove the unit from the list
@@ -113,7 +114,7 @@ class _ListIngredientsUnitScreenState extends State<ListIngredientsUnitScreen> {
           units.removeWhere((unit) => unit['id'] == unitId);
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Unit deleted successfully')),
+          const SnackBar(content: Text('Unit deleted successfully')),
         );
         _fetchUnits(); // Refresh the list after deletion
       } else {
@@ -156,24 +157,16 @@ class _ListIngredientsUnitScreenState extends State<ListIngredientsUnitScreen> {
           padding: EdgeInsets.all(ScreenUtil.setWidth(16)),
           child: Column(
             children: [
-              // Search Bar
-              TextFormField(
-                controller: searchController,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search),
-                  labelText: 'Search',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(ScreenUtil.setWidth(20)),
-                  ),
-                ),
-              ),
-              SizedBox(height: ScreenUtil.setHeight(16)),
-
               // Loading Indicator
               if (isLoading)
-                Center(child: CircularProgressIndicator())
+                const Center(
+                  child: SpinKitFadingCircle(
+                    color: Colors.purple,
+                    size: 50.0,
+                  ),
+                )
               else
-              // List of units
+                // List of units
                 Expanded(
                   child: ListView.builder(
                     itemCount: units.length,
@@ -184,7 +177,8 @@ class _ListIngredientsUnitScreenState extends State<ListIngredientsUnitScreen> {
                       log('Unit data: ${unit.toString()}');
 
                       return CommonListItem(
-                        title: unit['name'] ?? 'Unnamed', // Use null-aware operator
+                        title: unit['name'] ??
+                            'Unnamed', // Use null-aware operator
                         onEdit: () {
                           print('Edit tapped for ${unit['name']}');
                           // Add your edit logic here
