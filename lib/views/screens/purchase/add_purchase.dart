@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stock_managment/screen_util.dart';
 import 'package:stock_managment/token_service.dart';
 import 'package:stock_managment/widgets/button.dart';
+import 'package:stock_managment/widgets/dots.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -20,20 +21,24 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
   String? _name;
   int? _supplierId;
   int? _unitId;
+  int? _ingredientId; // Added ingredient ID
   double? _quantity;
   double? _price;
   DateTime selectedDate = DateTime.now();
 
   List<dynamic> suppliers = [];
   List<dynamic> units = [];
+  List<dynamic> ingredients = []; // List to hold ingredients
   bool isLoadingSuppliers = true;
   bool isLoadingUnits = true;
+  bool isLoadingIngredients = true; // Loading state for ingredients
 
   @override
   void initState() {
     super.initState();
     fetchSuppliers();
     fetchUnits();
+    fetchIngredients(); // Fetch ingredients on init
   }
 
   Future<void> fetchSuppliers() async {
@@ -86,6 +91,31 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
     }
   }
 
+  Future<void> fetchIngredients() async { // New method to fetch ingredients
+    final token = await _tokenService.getToken();
+    final response = await http.get(
+      Uri.parse('http://stock.cslancer.com/api/ingredients'), // Ensure this endpoint exists
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        ingredients = json.decode(response.body);
+        isLoadingIngredients = false;
+      });
+    } else {
+      setState(() {
+        isLoadingIngredients = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load ingredients')),
+      );
+    }
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -115,6 +145,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
         'Content-Type': 'application/json',
       },
       body: json.encode({
+        "ingredient_id": _ingredientId, // Include ingredient_id
         "supplier_id": _supplierId,
         "unit_id": _unitId,
         "quantity": _quantity,
@@ -189,7 +220,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
                   ? const SizedBox(
                 height: 20,
                 width: 20,
-                child: CircularProgressIndicator(strokeWidth: 2.0),
+                child: LoadingDots(),
               )
                   : DropdownButtonFormField<int>(
                 decoration: const InputDecoration(border: OutlineInputBorder()),
@@ -215,7 +246,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
                   ? const SizedBox(
                 height: 20,
                 width: 20,
-                child: CircularProgressIndicator(strokeWidth: 2.0),
+                child: LoadingDots(),
               )
                   : DropdownButtonFormField<int>(
                 decoration: const InputDecoration(border: OutlineInputBorder()),
@@ -232,6 +263,32 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
                 },
                 validator: (value) => value == null ? 'Please select a unit' : null,
                 onSaved: (value) => _unitId = value,
+              ),
+              SizedBox(height: ScreenUtil.setHeight(16)),
+
+              // Ingredient dropdown
+              _buildLabel('Ingredient:'),
+              isLoadingIngredients
+                  ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: LoadingDots(),
+              )
+                  : DropdownButtonFormField<int>(
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                items: ingredients.map<DropdownMenuItem<int>>((ingredient) {
+                  return DropdownMenuItem<int>(
+                    value: ingredient['id'],
+                    child: Text(ingredient['name']),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _ingredientId = value; // Save selected ingredient ID
+                  });
+                },
+                validator: (value) => value == null ? 'Please select an ingredient' : null,
+                onSaved: (value) => _ingredientId = value,
               ),
               SizedBox(height: ScreenUtil.setHeight(16)),
 
