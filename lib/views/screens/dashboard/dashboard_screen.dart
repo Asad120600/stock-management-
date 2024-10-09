@@ -13,7 +13,7 @@ import 'package:stock_managment/views/screens/dashboard/items_detail_page.dart';
 import 'package:stock_managment/widgets/dots.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert'; // For json decoding
+import 'dart:convert';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -96,6 +96,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 'quantity': purchase['quantity'],
                 'price': purchase['price'],
                 'expiration_date': purchase['expiration_date'],
+                'total_amount': purchase['total_amount'],
+
               };
             }).toList();
           });
@@ -483,17 +485,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
         SizedBox(height: ScreenUtil.setHeight(10)),
         Center(
           child: ElevatedButton(
-            onPressed: _isLoading ? null :  _onGetReportPressed,
-            style:  ElevatedButton.styleFrom(
+            onPressed: _isLoading ? null : _onGetReportPressed,
+            style: ElevatedButton.styleFrom(
               backgroundColor: Colors.purple,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(ScreenUtil.setWidth(15)), // Scale border radius
               ),
             ),
-            child: _isLoading ? const LoadingDots() : const Text('Get Report',style: TextStyle(color: Colors.white
-            ),),
+            child: _isLoading ? const LoadingDots() : const Text('Get Report', style: TextStyle(color: Colors.white)),
           ),
-        ),if (_reportData != null) ...[
+        ),
+        if (_reportData != null) ...[
           SizedBox(height: ScreenUtil.setHeight(10)),
           Center(
             child: Text(
@@ -526,21 +528,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Text('Expiration Date: ${item['expiration_date'] ?? 'N/A'}'),
                   ],
                 ),
-                trailing: Text('${item['price']}'),
+                trailing: Text('${item['total_amount']?.toString() ?? 'N/A'}'), // Safely access total_amount
               );
             },
           ),
-          SizedBox(height: ScreenUtil.setHeight(10),),
+          SizedBox(height: ScreenUtil.setHeight(10)),
           Center(
             child: ElevatedButton(
               onPressed: _downloadReportAsPdf,
-              style:  ElevatedButton.styleFrom(
+              style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.purple,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(ScreenUtil.setWidth(15)), // Scale border radius
                 ),
               ),
-              child: const Text('Download Report',style: TextStyle(color: Colors.white),),
+              child: const Text('Download Report', style: TextStyle(color: Colors.white)),
             ),
           ),
         ],
