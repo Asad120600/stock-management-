@@ -152,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
               left: 0,
               child: Image.asset(
                 'assets/images/Vector 2.png',
-                width: ScreenUtil.setWidth(150),
+                width: ScreenUtil.setWidth(250),
               ),
             ),
             Padding(
@@ -227,24 +227,24 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: ScreenUtil.setHeight(5)),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        // Forgot password logic can be implemented here
-                      },
-                      child: Text(
-                        'Forgot Password?',
-                        style: TextStyle(
-                          color: Colors.purple,
-                          fontSize: ScreenUtil.setSp(16),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: ScreenUtil.setHeight(5)),
+                  SizedBox(height: ScreenUtil.setHeight(20)),
+                  // Align(
+                  //   alignment: Alignment.centerRight,
+                  //   child: TextButton(
+                  //     onPressed: () {
+                  //       // Forgot password logic can be implemented here
+                  //     },
+                  //     child: Text(
+                  //       'Forgot Password?',
+                  //       style: TextStyle(
+                  //         color: Colors.purple,
+                  //         fontSize: ScreenUtil.setSp(16),
+                  //         fontWeight: FontWeight.w600,
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
+                  // SizedBox(height: ScreenUtil.setHeight(5)),
           SizedBox(
             width: double.infinity,
             height: ScreenUtil.setHeight(50),
@@ -253,7 +253,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ? () => _login()
                   : () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
+                  const SnackBar(
                     content: Text(
                       "Please fill in your credentials.",
                       style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
@@ -268,36 +268,33 @@ class _LoginScreenState extends State<LoginScreen> {
               text: _isLoading ? 'Logging in...' : 'Log In',
             ),
           ),
-
-
-
-          SizedBox(height: ScreenUtil.setHeight(8)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Don't have an account?",
-                        style: TextStyle(
-                          fontSize: ScreenUtil.setSp(22),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUpScreen()));
-                        },
-                        child: Text(
-                          'Sign up',
-                          style: TextStyle(
-                            color: Colors.purple,
-                            fontSize: ScreenUtil.setSp(22),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: ScreenUtil.setHeight(80)),
+                  SizedBox(height: ScreenUtil.setHeight(8)),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   children: [
+                  //     Text(
+                  //       "Don't have an account?",
+                  //       style: TextStyle(
+                  //         fontSize: ScreenUtil.setSp(22),
+                  //         fontWeight: FontWeight.w600,
+                  //       ),
+                  //     ),
+                      // TextButton(
+                      //   onPressed: () {
+                      //     Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUpScreen()));
+                      //   },
+                      //   child: Text(
+                      //     'Sign up',
+                      //     style: TextStyle(
+                      //       color: Colors.purple,
+                      //       fontSize: ScreenUtil.setSp(22),
+                      //       fontWeight: FontWeight.w600,
+                      //     ),
+                      //   ),
+                      // ),
+                  //   ],
+                  // ),
+                  SizedBox(height: ScreenUtil.setHeight(210)),
                 ],
               ),
             ),

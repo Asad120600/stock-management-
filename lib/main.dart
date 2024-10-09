@@ -15,9 +15,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   final SharedPreferences prefs;
-
   const MyApp({super.key, required this.prefs});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
