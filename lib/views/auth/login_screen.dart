@@ -140,8 +140,8 @@ class _LoginScreenState extends State<LoginScreen> {
             Positioned(
               top: 0,
               right: 0,
-              child: Image.asset(
-                'assets/images/Vector 1.png',
+              child: Image.network(
+                'http://stock.cslancer.com/images/Vector1.png',
                 width: ScreenUtil.setWidth(150),
               ),
             ),
@@ -149,8 +149,8 @@ class _LoginScreenState extends State<LoginScreen> {
             Positioned(
               bottom: 0,
               left: 0,
-              child: Image.asset(
-                'assets/images/Vector 2.png',
+              child: Image.network(
+                'http://stock.cslancer.com/images/Vector2.png',
                 width: ScreenUtil.setWidth(200),
               ),
             ),
@@ -171,8 +171,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   SizedBox(height: ScreenUtil.setHeight(50)),
                   Center(
-                    child: Image.asset(
-                      'assets/images/login.png',
+                    child: Image.network(
+                      'http://stock.cslancer.com/images/login.png',
                       height: ScreenUtil.setHeight(150),
                     ),
                   ),

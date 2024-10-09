@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart'; // Import intl package for date formatting
 import 'package:stock_managment/services/token_service.dart';
 
 class ItemDetailsPage extends StatefulWidget {
@@ -38,9 +39,12 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      setState(() {
-        units = {for (var unit in data) unit['id']: unit['name']};
-      });
+      // Check if the widget is still mounted before calling setState
+      if (mounted) {
+        setState(() {
+          units = {for (var unit in data) unit['id']: unit['name']};
+        });
+      }
     } else {
       print('Failed to load units: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -57,10 +61,15 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
             label,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          Text(value),
+          Flexible(child: Text(value, textAlign: TextAlign.end)),
         ],
       ),
     );
+  }
+
+  String _formatDate(String dateString) {
+    final DateTime date = DateTime.parse(dateString);
+    return DateFormat('yyyy-MM-dd – HH:mm').format(date);
   }
 
   @override
@@ -72,22 +81,33 @@ class _ItemDetailsPageState extends State<ItemDetailsPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildDetailRow('ID:', widget.item['id'].toString()),
-              _buildDetailRow('Ingredient:', widget.item['ingredient']),
-              _buildDetailRow('Supplier:', widget.item['supplier']),
-              _buildDetailRow(
-                'Unit:',
-                units[widget.item['unit_id']] ?? 'Loading...', // Show unit name
+          child: Card( // Adding a Card for better UI
+            elevation: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildDetailRow('ID:', widget.item['id'].toString()),
+                  _buildDetailRow('Ingredient:', widget.item['ingredient']),
+                  _buildDetailRow('Supplier:', widget.item['supplier']),
+                  _buildDetailRow(
+                    'Unit:',
+                    units[widget.item['unit_id']] ?? 'Loading...', // Show unit name
+                  ),
+                  _buildDetailRow('Quantity:', widget.item['quantity'].toString()),
+                  _buildDetailRow('Price:', widget.item['price'].toString()),
+                  _buildDetailRow(
+                    'Expiration Date:',
+                    _formatDate(widget.item['expiration_date']),
+                  ),
+                  _buildDetailRow(
+                    'Created At:',
+                    _formatDate(widget.item['created_at']),
+                  ),
+                ],
               ),
-              _buildDetailRow('Quantity:', widget.item['quantity']),
-              _buildDetailRow('Price:', widget.item['price']),
-              _buildDetailRow('Expiration Date:', widget.item['expiration_date']),
-              _buildDetailRow('Created At:', widget.item['created_at']),
-              _buildDetailRow('Updated At:', widget.item['updated_at']),
-            ],
+            ),
           ),
         ),
       ),
