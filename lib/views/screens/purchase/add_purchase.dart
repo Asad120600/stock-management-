@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stock_managment/screen_util.dart';
-import 'package:stock_managment/token_service.dart';
+import 'package:stock_managment/utils/screen_util.dart';
+import 'package:stock_managment/services/token_service.dart';
 import 'package:stock_managment/widgets/button.dart';
 import 'package:stock_managment/widgets/dots.dart';
 import 'package:stock_managment/widgets/drawer.dart';

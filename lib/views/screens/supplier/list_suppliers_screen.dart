@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert'; // For jsonDecode
-import 'package:stock_managment/screen_util.dart';
+import 'package:stock_managment/utils/screen_util.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 import 'package:stock_managment/widgets/popup_menu.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart'; // Import flutter_spinkit

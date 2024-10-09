@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:stock_managment/screen_util.dart';
+import 'package:stock_managment/utils/screen_util.dart';
 import 'package:stock_managment/views/auth/signup_screen.dart';
-import 'package:stock_managment/views/screens/dashboard_screen.dart';
+import 'package:stock_managment/views/screens/dashboard/dashboard_screen.dart';
 import 'package:stock_managment/widgets/button.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';

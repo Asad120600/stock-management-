@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stock_managment/widgets/popup_menu.dart';
-import 'package:stock_managment/screen_util.dart';
+import 'package:stock_managment/utils/screen_util.dart';
 
 class CommonListItem extends StatefulWidget {
   final String title;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stock_managment/screen_util.dart';
+import 'package:stock_managment/utils/screen_util.dart';
 import 'package:stock_managment/views/auth/login_screen.dart';
 import 'package:stock_managment/widgets/button.dart';
 import 'package:http/http.dart' as http;

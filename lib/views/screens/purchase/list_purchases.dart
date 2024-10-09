@@ -1,12 +1,12 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:stock_managment/screen_util.dart';
+import 'package:stock_managment/utils/screen_util.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 import 'package:stock_managment/widgets/popup_menu.dart';
 import 'package:http/http.dart' as http; // Import HTTP package
 import 'dart:convert';
-import 'package:stock_managment/token_service.dart';
+import 'package:stock_managment/services/token_service.dart';
 
 class ListPurchaseScreen extends StatefulWidget {
   const ListPurchaseScreen({super.key});

@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -7,10 +6,11 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:stock_managment/screen_util.dart';
-import 'package:stock_managment/token_service.dart';
+import 'package:stock_managment/utils/screen_util.dart';
+import 'package:stock_managment/services/token_service.dart';
 import 'package:stock_managment/views/auth/login_screen.dart';
-import 'package:stock_managment/views/screens/items_detail_page.dart';
+import 'package:stock_managment/views/screens/dashboard/items_detail_page.dart';
+import 'package:stock_managment/widgets/dots.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; // For json decoding
@@ -21,7 +21,6 @@ class DashboardScreen extends StatefulWidget {
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
-
 class _DashboardScreenState extends State<DashboardScreen> {
   final TokenService _tokenService = TokenService();
   String? userName;
@@ -42,13 +41,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _fetchReport();
     _fetchPurchases();
   }
- // fetch reports
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // You can now use _showSnackBar safely here if needed
+  }
 
-
+  // Updated fetchReport method without date validation
   Future<void> _fetchReport() async {
+    // Ensure start and end dates are non-null
     if (_startDate == null || _endDate == null) {
-      _showSnackBar('Please select both start and end dates.');
+      // _showSnackBar('Please select both start and end dates.');
       return;
     }
 
@@ -64,9 +68,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return;
       }
 
+      // Safely format the dates only if they are not null
+      final String formattedStartDate = DateFormat('yyyy-MM-dd').format(_startDate!);
+      final String formattedEndDate = DateFormat('yyyy-MM-dd').format(_endDate!);
+
       final response = await http.get(
         Uri.parse(
-          'https://stock.cslancer.com/api/dashboard/report?from=${DateFormat('yyyy-MM-dd').format(_startDate!)}&to=${DateFormat('yyyy-MM-dd').format(_endDate!)}',
+          'https://stock.cslancer.com/api/dashboard/report?from=$formattedStartDate&to=$formattedEndDate',
         ),
         headers: {
           'Authorization': 'Bearer $token',
@@ -77,12 +85,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         final Map<String, dynamic> report = json.decode(response.body);
 
         if (report['status'] == 'success') {
-          print(report); // Print the report data to see its structure
+          log(report.toString()); // Print the report data to see its structure
           setState(() {
-            _reportData = report['purchases'].map((purchase) {
+            _reportData = (report['purchases'] as List).map((purchase) {
               return {
                 'id': purchase['id'],
-                'ingredient': purchase['ingredient'], // Keep as is for debugging
+                'ingredient': purchase['ingredient'],
                 'supplier': purchase['supplier']['name'],
                 'unit': purchase['unit']['name'],
                 'quantity': purchase['quantity'],
@@ -94,12 +102,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         } else {
           throw Exception('No data found for the selected dates.');
         }
-
-    } else {
+      } else {
         throw Exception('Failed to load report: ${response.reasonPhrase}');
       }
     } catch (e) {
-      print('Error loading report: ${e.toString()}');
+      log('Error loading report: ${e.toString()}');
       _showSnackBar('Error loading report: ${e.toString()}');
     } finally {
       setState(() {
@@ -107,79 +114,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
     }
   }
-
-  Widget _buildReportSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Get Report', style: TextStyle(fontSize: ScreenUtil.setSp(18), fontWeight: FontWeight.w600)),
-        SizedBox(height: ScreenUtil.setHeight(10)),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildDateField(
-              context: context,
-              hintText: _startDate == null ? 'Start Date' : DateFormat('dd/MM/yyyy').format(_startDate!),
-              isStartDate: true,
-            ),
-            _buildDateField(
-              context: context,
-              hintText: _endDate == null ? 'End Date' : DateFormat('dd/MM/yyyy').format(_endDate!),
-              isStartDate: false,
-            ),
-          ],
-        ),
-        SizedBox(height: ScreenUtil.setHeight(10)),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _fetchReport,
-          child: _isLoading ? CircularProgressIndicator() : Text('Get Report'),
-        ),
-        if (_reportData != null) ...[
-          SizedBox(height: ScreenUtil.setHeight(10)),
-          Center(
-            child: Text(
-              'Stock Report\nFrom ${DateFormat('dd/MM/yyyy').format(_startDate!)} To ${DateFormat('dd/MM/yyyy').format(_endDate!)}',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: ScreenUtil.setSp(18)),
-            ),
-          ),
-          SizedBox(height: ScreenUtil.setHeight(10)),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: _reportData!.length,
-            itemBuilder: (context, index) {
-              final item = _reportData![index];
-              final ingredient = item['ingredient'];
-              final supplier = item['supplier'];
-              final unit = item['unit'];
-              return ListTile(
-                title: Text(
-                  ingredient is String
-                      ? ingredient
-                      : (ingredient['name'] ?? 'Unknown Ingredient'),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Quantity: ${item['quantity']?.toString() ?? 'N/A'} ${unit is Map ? unit['name'] ?? '' : (unit?.toString() ?? '')}'),
-                    Text('Supplier: ${supplier is Map ? supplier['name'] ?? 'Unknown Supplier' : supplier?.toString()}'),
-                    Text('Expiration Date: ${item['expiration_date'] ?? 'N/A'}'),
-                  ],
-                ),
-                trailing: Text('${item['price']}'),
-              );
-            },
-          ),
-          ElevatedButton(
-            onPressed: _downloadReportAsPdf,
-            child: Text('Download Report'),
-          ),
-        ],
-      ],
-    );
-  }
-
+  // download report as pdf
   void _downloadReportAsPdf() async {
     final pdf = pw.Document();
 
@@ -262,7 +197,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       onLayout: (PdfPageFormat format) async => pdf.save(),
     );
   }
-
   // select date
   Future<void> _selectDate(BuildContext context, {required bool isStartDate}) async {
     final DateTime? pickedDate = await showDatePicker(
@@ -282,36 +216,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
     }
   }
-
-  Widget _buildDateField({
-    required BuildContext context,
-    required String hintText,
-    required bool isStartDate,
-  }) {
-    return InkWell(
-      onTap: () {
-        _selectDate(context, isStartDate: isStartDate);
-      },
-      child: Container(
-        width: ScreenUtil.setWidth(160),
-        padding: EdgeInsets.symmetric(vertical: ScreenUtil.setHeight(12)),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(ScreenUtil.setWidth(10)),
-          border: Border.all(color: Colors.grey),
-        ),
-        child: Center(
-          child: Text(
-            hintText,
-            style: TextStyle(
-              color: Colors.black54,
-              fontSize: ScreenUtil.setSp(16),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
+  // fetch purchases
   Future<void> _fetchPurchases() async {
     try {
       String? token = await TokenService().getToken(); // Fetch token from your TokenService
@@ -337,7 +242,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       log("Error: $e");
     }
   }
-
+  // fetch username
   Future<void> fetchUserName() async {
     final prefs = await SharedPreferences.getInstance();
     final email = prefs.getString('email'); // Get the email
@@ -351,7 +256,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
     }
   }
-
+  // fetch dashboard data
   Future<void> fetchDashboardData() async {
     try {
       String? token = await _tokenService.getToken(); // Fetch token
@@ -376,7 +281,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       log("Error: $e");
     }
   }
-
+  //
   Future<void> fetchTotalSuppliers() async {
     final url = Uri.parse('http://stock.cslancer.com/api/suppliers');
 
@@ -445,20 +350,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  // snackbar
+  // snack bar
   void _showSnackBar(String message) {
-    // Ensure to use the context from the build method
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    // Use the build method context
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    });
   }
-
+// on get report pressed
+  void _onGetReportPressed() {
+    if (_startDate == null || _endDate == null) {
+      _showSnackBar('Please select both start and end dates.');
+    } else {
+      _fetchReport(); // Call the fetchReport method only if dates are selected
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Initialize ScreenUtil with the current context to get screen dimensions
     ScreenUtil.init(context);
-
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -545,6 +457,125 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+
+  // report section
+  Widget _buildReportSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Get Report', style: TextStyle(fontSize: ScreenUtil.setSp(18), fontWeight: FontWeight.w600)),
+        SizedBox(height: ScreenUtil.setHeight(10)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildDateField(
+              context: context,
+              hintText: _startDate == null ? 'Start Date' : DateFormat('dd/MM/yyyy').format(_startDate!),
+              isStartDate: true,
+            ),
+            _buildDateField(
+              context: context,
+              hintText: _endDate == null ? 'End Date' : DateFormat('dd/MM/yyyy').format(_endDate!),
+              isStartDate: false,
+            ),
+          ],
+        ),
+        SizedBox(height: ScreenUtil.setHeight(10)),
+        Center(
+          child: ElevatedButton(
+            onPressed: _isLoading ? null :  _onGetReportPressed,
+            style:  ElevatedButton.styleFrom(
+              backgroundColor: Colors.purple,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(ScreenUtil.setWidth(15)), // Scale border radius
+              ),
+            ),
+            child: _isLoading ? const LoadingDots() : const Text('Get Report',style: TextStyle(color: Colors.white
+            ),),
+          ),
+        ),if (_reportData != null) ...[
+          SizedBox(height: ScreenUtil.setHeight(10)),
+          Center(
+            child: Text(
+              'Stock Report\nFrom ${DateFormat('dd/MM/yyyy').format(_startDate!)} To ${DateFormat('dd/MM/yyyy').format(_endDate!)}',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: ScreenUtil.setSp(18)),
+            ),
+          ),
+          SizedBox(height: ScreenUtil.setHeight(10)),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _reportData!.length,
+            itemBuilder: (context, index) {
+              final item = _reportData![index];
+              final ingredient = item['ingredient'];
+              final supplier = item['supplier'];
+              final unit = item['unit'];
+              return ListTile(
+                title: Text(
+                  ingredient is String
+                      ? ingredient
+                      : (ingredient['name'] ?? 'Unknown Ingredient'),
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Quantity: ${item['quantity']?.toString() ?? 'N/A'} ${unit is Map ? unit['name'] ?? '' : (unit?.toString() ?? '')}'),
+                    Text('Supplier: ${supplier is Map ? supplier['name'] ?? 'Unknown Supplier' : supplier?.toString()}'),
+                    Text('Expiration Date: ${item['expiration_date'] ?? 'N/A'}'),
+                  ],
+                ),
+                trailing: Text('${item['price']}'),
+              );
+            },
+          ),
+          SizedBox(height: ScreenUtil.setHeight(10),),
+          Center(
+            child: ElevatedButton(
+              onPressed: _downloadReportAsPdf,
+              style:  ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(ScreenUtil.setWidth(15)), // Scale border radius
+                ),
+              ),
+              child: const Text('Download Report',style: TextStyle(color: Colors.white),),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+  // date Field
+  Widget _buildDateField({
+    required BuildContext context,
+    required String hintText,
+    required bool isStartDate,
+  }) {
+    return InkWell(
+      onTap: () {
+        _selectDate(context, isStartDate: isStartDate);
+      },
+      child: Container(
+        width: ScreenUtil.setWidth(160),
+        padding: EdgeInsets.symmetric(vertical: ScreenUtil.setHeight(12)),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(ScreenUtil.setWidth(10)),
+          border: Border.all(color: Colors.grey),
+        ),
+        child: Center(
+          child: Text(
+            hintText,
+            style: TextStyle(
+              color: Colors.black54,
+              fontSize: ScreenUtil.setSp(16),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
   Widget _buildStatCard(BuildContext context, {required String title, required String value, required IconData icon, required Color color}) {
     return Container(
       width: ScreenUtil.setWidth(160),
@@ -585,8 +616,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-
-// Builds the Amount Spent Card
+  // Builds the Amount Spent Card
   Widget _buildAmountSpentCard() {
     return Container(
       width: double.infinity,
@@ -625,8 +655,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-
-// Builds the List Items Section
+  // Builds the List Items Section
   Widget _buildListItemsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -697,7 +726,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ],
     );
   }
-
+  // List Item
   Widget _buildListItem({required Map<String, dynamic> item}) {
     return InkWell(
       onTap: () {
@@ -752,61 +781,4 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-
-  //
-  // void _showItemDetailsDialog(
-  //     BuildContext context,
-  //     String title,
-  //     String total,
-  //     String supplier,
-  //     String amount,
-  //     ) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text(
-  //           'Details for $title',
-  //           style: const TextStyle(fontWeight: FontWeight.bold),
-  //         ),
-  //         content: Padding(
-  //           padding: const EdgeInsets.symmetric(vertical: 16.0),
-  //           child: SingleChildScrollView(
-  //             child: ListBody(
-  //               children: [
-  //                 _buildDetailRow('Total:', total),
-  //                 _buildDetailRow('Supplier:', supplier),
-  //                 _buildDetailRow('Amount:', amount),
-  //               ],
-  //             ),
-  //           ),
-  //         ),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             child: const Text('Close'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  //  }
-  //
-  // Widget _buildDetailRow(String label, String value) {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(vertical: 4.0),
-  //     child: Row(
-  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //       children: [
-  //         Text(
-  //           label,
-  //           style: const TextStyle(fontWeight: FontWeight.w600),
-  //         ),
-  //         Text(value),
-  //       ],
-  //     ),
-  //   );
-  // }
 }

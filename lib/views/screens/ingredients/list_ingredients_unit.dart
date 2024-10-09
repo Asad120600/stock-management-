@@ -3,10 +3,10 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http; // Import the http package
-import 'package:stock_managment/screen_util.dart';
+import 'package:stock_managment/utils/screen_util.dart';
 import 'package:stock_managment/widgets/card.dart';
 import 'package:stock_managment/widgets/drawer.dart';
-import 'package:stock_managment/token_service.dart'; // Import your TokenService
+import 'package:stock_managment/services/token_service.dart'; // Import your TokenService
 
 class ListIngredientsUnitScreen extends StatefulWidget {
   const ListIngredientsUnitScreen({super.key});

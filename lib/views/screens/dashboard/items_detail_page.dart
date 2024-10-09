@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:stock_managment/token_service.dart';
+import 'package:stock_managment/services/token_service.dart';
 
 class ItemDetailsPage extends StatefulWidget {
   final Map<String, dynamic> item;

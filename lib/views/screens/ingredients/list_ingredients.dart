@@ -1,7 +1,8 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:stock_managment/screen_util.dart';
-import 'package:stock_managment/token_service.dart';
+import 'package:stock_managment/utils/screen_util.dart';
+import 'package:stock_managment/services/token_service.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 import 'package:stock_managment/widgets/popup_menu.dart';
 import 'package:http/http.dart' as http;
@@ -47,7 +48,7 @@ class _ListIngredientsScreenState extends State<ListIngredientsScreen> {
         throw Exception('Failed to load units');
       }
     } catch (e) {
-      print("Error fetching units: $e");
+      log("Error fetching units: $e");
     }
   }
 
@@ -93,9 +94,9 @@ class _ListIngredientsScreenState extends State<ListIngredientsScreen> {
       });
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Ingredient deleted successfully.'),
-          duration: const Duration(seconds: 2),
+          duration: Duration(seconds: 2),
         ),
       );
     } else {
@@ -130,7 +131,7 @@ class _ListIngredientsScreenState extends State<ListIngredientsScreen> {
           horizontal: ScreenUtil.setWidth(16),
         ),
         child: isLoading
-            ? Center(
+            ? const Center(
           child: SpinKitFadingCircle(
             color: Colors.purple,
             size: 50.0,
@@ -173,7 +174,7 @@ class _ListIngredientsScreenState extends State<ListIngredientsScreen> {
     return Container(
       decoration: BoxDecoration(
         color: cardColor, // Alternating background colors
-        borderRadius: BorderRadius.circular(8), // Rounded corners
+        borderRadius: BorderRadius.circular(25), // Rounded corners
       ),
       margin: EdgeInsets.only(bottom: ScreenUtil.setHeight(16)),
       child: ListTile(
@@ -206,7 +207,7 @@ class _ListIngredientsScreenState extends State<ListIngredientsScreen> {
         ),
         trailing: PopupMenuWidget(
           onEdit: () {
-            print('Edit tapped for ${ingredient['name']}');
+            log('Edit tapped for ${ingredient['name']}');
             // Add your edit logic here
           },
           onDelete: () {

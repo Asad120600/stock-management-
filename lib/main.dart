@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stock_managment/views/auth/login_screen.dart';
-import 'package:stock_managment/views/screens/dashboard_screen.dart';
+import 'package:stock_managment/views/screens/dashboard/dashboard_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
