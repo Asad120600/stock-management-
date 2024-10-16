@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stock_managment/utils/screen_util.dart';
 import 'package:stock_managment/services/token_service.dart';
+import 'package:stock_managment/views/screens/dashboard/dashboard_screen.dart';
 import 'package:stock_managment/widgets/button.dart';
 import 'package:stock_managment/widgets/dots.dart';
 import 'package:stock_managment/widgets/drawer.dart';
@@ -44,7 +45,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
   Future<void> fetchSuppliers() async {
     final token = await _tokenService.getToken();
     final response = await http.get(
-      Uri.parse('http://stock.cslancer.com/api/suppliers'),
+      Uri.parse('https://stock.cslancer.com/api/suppliers'),
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
@@ -69,7 +70,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
   Future<void> fetchUnits() async {
     final token = await _tokenService.getToken();
     final response = await http.get(
-      Uri.parse('http://stock.cslancer.com/api/units'),
+      Uri.parse('https://stock.cslancer.com/api/units'),
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
@@ -94,7 +95,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
   Future<void> fetchIngredients() async { // New method to fetch ingredients
     final token = await _tokenService.getToken();
     final response = await http.get(
-      Uri.parse('http://stock.cslancer.com/api/ingredients'), // Ensure this endpoint exists
+      Uri.parse('https://stock.cslancer.com/api/ingredients'), // Ensure this endpoint exists
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
@@ -138,7 +139,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
 
     final token = await _tokenService.getToken();
     final response = await http.post(
-      Uri.parse('http://stock.cslancer.com/api/purchases'),
+      Uri.parse('https://stock.cslancer.com/api/purchases'),
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
@@ -158,7 +159,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Purchase added successfully.')),
       );
-      Navigator.pop(context);
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> DashboardScreen()));
     } else {
       final responseBody = json.decode(response.body);
       print('Failed to add purchase: ${response.statusCode} - ${response.body}');
@@ -205,66 +206,14 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
               ),
               SizedBox(height: ScreenUtil.setHeight(16)),
 
-              // Name field
-              _buildLabel('Name:'),
-              TextFormField(
-                decoration: const InputDecoration(border: OutlineInputBorder()),
-                validator: (value) => value == null || value.isEmpty ? 'Please enter a name' : null,
-                onSaved: (value) => _name = value,
-              ),
-              SizedBox(height: ScreenUtil.setHeight(16)),
-
-              // Supplier dropdown
-              _buildLabel('Supplier:'),
-              isLoadingSuppliers
-                  ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: LoadingDots(),
-              )
-                  : DropdownButtonFormField<int>(
-                decoration: const InputDecoration(border: OutlineInputBorder()),
-                items: suppliers.map<DropdownMenuItem<int>>((supplier) {
-                  return DropdownMenuItem<int>(
-                    value: supplier['id'],
-                    child: Text(supplier['name']),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _supplierId = value;
-                  });
-                },
-                validator: (value) => value == null ? 'Please select a supplier' : null,
-                onSaved: (value) => _supplierId = value,
-              ),
-              SizedBox(height: ScreenUtil.setHeight(16)),
-
-              // Unit dropdown
-              _buildLabel('Unit of Measurement:'),
-              isLoadingUnits
-                  ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: LoadingDots(),
-              )
-                  : DropdownButtonFormField<int>(
-                decoration: const InputDecoration(border: OutlineInputBorder()),
-                items: units.map<DropdownMenuItem<int>>((unit) {
-                  return DropdownMenuItem<int>(
-                    value: unit['id'],
-                    child: Text(unit['name']),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _unitId = value;
-                  });
-                },
-                validator: (value) => value == null ? 'Please select a unit' : null,
-                onSaved: (value) => _unitId = value,
-              ),
-              SizedBox(height: ScreenUtil.setHeight(16)),
+              // // Name field
+              // _buildLabel('Name:'),
+              // TextFormField(
+              //   decoration: const InputDecoration(border: OutlineInputBorder()),
+              //   validator: (value) => value == null || value.isEmpty ? 'Please enter a name' : null,
+              //   onSaved: (value) => _name = value,
+              // ),
+              // SizedBox(height: ScreenUtil.setHeight(16)),
 
               // Ingredient dropdown
               _buildLabel('Ingredient:'),
@@ -301,6 +250,61 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
                 onSaved: (value) => _quantity = double.tryParse(value!),
               ),
               SizedBox(height: ScreenUtil.setHeight(16)),
+              // Unit dropdown
+              _buildLabel('Unit of Measurement:'),
+              isLoadingUnits
+                  ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: LoadingDots(),
+              )
+                  : DropdownButtonFormField<int>(
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                items: units.map<DropdownMenuItem<int>>((unit) {
+                  return DropdownMenuItem<int>(
+                    value: unit['id'],
+                    child: Text(unit['name']),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _unitId = value;
+                  });
+                },
+                validator: (value) => value == null ? 'Please select a unit' : null,
+                onSaved: (value) => _unitId = value,
+              ),
+              SizedBox(height: ScreenUtil.setHeight(16)),
+
+
+              // Supplier dropdown
+              _buildLabel('Supplier:'),
+              isLoadingSuppliers
+                  ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: LoadingDots(),
+              )
+                  : DropdownButtonFormField<int>(
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                items: suppliers.map<DropdownMenuItem<int>>((supplier) {
+                  return DropdownMenuItem<int>(
+                    value: supplier['id'],
+                    child: Text(supplier['name']),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _supplierId = value;
+                  });
+                },
+                validator: (value) => value == null ? 'Please select a supplier' : null,
+                onSaved: (value) => _supplierId = value,
+              ),
+              SizedBox(height: ScreenUtil.setHeight(16)),
+
+
+
 
               // Purchase Price field
               _buildLabel('Purchase Price:'),

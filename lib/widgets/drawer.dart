@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_remix/flutter_remix.dart';
 import 'package:stock_managment/utils/screen_util.dart';
 import 'package:stock_managment/views/screens/food%20items/add_food_screen.dart';
 import 'package:stock_managment/views/screens/category/add_category.dart';
@@ -11,6 +12,8 @@ import 'package:stock_managment/views/screens/ingredients/list_ingredients.dart'
 import 'package:stock_managment/views/screens/food%20items/food_items_list.dart';
 import 'package:stock_managment/views/screens/purchase/add_purchase.dart';
 import 'package:stock_managment/views/screens/purchase/list_purchases.dart';
+import 'package:stock_managment/views/screens/sales/add_sale.dart';
+import 'package:stock_managment/views/screens/sales/list_sale.dart';
 import 'package:stock_managment/views/screens/supplier/add_supplier.dart';
 import 'package:stock_managment/views/screens/supplier/list_suppliers_screen.dart';
 
@@ -46,8 +49,7 @@ class AppDrawer extends StatelessWidget {
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DashboardScreen())),
           ),
 
-
-
+        _createExpansionTile(icon: Icons.menu_book, title: 'Food Menu', children: [
           _createDrawerItem(
             icon: Icons.add_shopping_cart_outlined,
             text: "Add Menu Item",
@@ -59,6 +61,7 @@ class AppDrawer extends StatelessWidget {
             text: "Menu List",
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MenuList())),
           ),
+        ]),
 
           // Purchased Expansion Tile
           _createExpansionTile(
@@ -115,10 +118,19 @@ class AppDrawer extends StatelessWidget {
               ),
             ],
           ),
+          _createExpansionTile(icon: Icons.point_of_sale, title: 'Sales', children: [
+            _createDrawerItem(text: 'Add Sales',onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>AddSales()));
+            },icon: FlutterRemix.add_box_fill),
+            _createDrawerItem(text: 'List Sales',onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>ListSalesScreen()));
+            },icon: FlutterRemix.list_check),
+          ])
         ],
       ),
     );
   }
+
 
   Widget _createDrawerItem({IconData? icon, required String text, GestureTapCallback? onTap}) {
     return ListTile(

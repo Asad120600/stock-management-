@@ -35,8 +35,6 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-
-// Inside your _login() function
   Future<void> _login() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       Fluttertoast.showToast(
@@ -68,28 +66,43 @@ class _LoginScreenState extends State<LoginScreen> {
         }),
       );
 
+      // Check if the response is valid and if it's JSON
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+        try {
+          final responseData = json.decode(response.body);
 
-        // Check if the 'access_token' key exists
-        if (responseData.containsKey('access_token')) {
-          final accessToken = responseData['access_token'];
+          // Ensure the response contains the access token
+          if (responseData != null && responseData is Map && responseData.containsKey('access_token')) {
+            final accessToken = responseData['access_token'];
 
-          // Store the token and email using SharedPreferences
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('token', accessToken); // Store the access token
-          await prefs.setString('email', _emailController.text); // Store the email
+            // Store the token and email using SharedPreferences
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('token', accessToken); // Store the access token
+            await prefs.setString('email', _emailController.text); // Store the email
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Login successful!')),
-          );
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const DashboardScreen()),
-          );
-        } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Login successful!')),
+            );
+
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const DashboardScreen()),
+            );
+          } else {
+            // If there's no access token, handle the error
+            Fluttertoast.showToast(
+              msg: "Access token not found in response.",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              backgroundColor: Colors.redAccent,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+          }
+        } catch (e) {
+          // Handle JSON decode error
           Fluttertoast.showToast(
-            msg: "Access token not found in response.",
+            msg: "Invalid response format from server.",
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
             backgroundColor: Colors.redAccent,
@@ -98,20 +111,34 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } else {
-        // Handle error response
-        final responseData = json.decode(response.body);
-        Fluttertoast.showToast(
-          msg: "Login failed: ${responseData['message'] ?? 'Unknown error'}",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.redAccent,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
+        // Handle non-200 status codes and error responses
+        final responseBody = response.body;
+
+        try {
+          final responseData = json.decode(responseBody);
+          Fluttertoast.showToast(
+            msg: "Login failed: ${responseData['message'] ?? 'Unknown error'}",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.redAccent,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        } catch (e) {
+          // Handle the case where the response is not a valid JSON
+          Fluttertoast.showToast(
+            msg: "Login failed. Server returned an invalid response.",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.redAccent,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }
       }
     } catch (error) {
       Fluttertoast.showToast(
-        msg: "An error occurred. Please try again.",
+        msg: "An error occurred: ${error.toString()}",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.redAccent,
@@ -124,7 +151,6 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -140,8 +166,8 @@ class _LoginScreenState extends State<LoginScreen> {
             Positioned(
               top: 0,
               right: 0,
-              child: Image.network(
-                'http://stock.cslancer.com/images/Vector1.png',
+              child: Image.asset(
+                'assets/images/Vector1.png',
                 width: ScreenUtil.setWidth(150),
               ),
             ),
@@ -149,8 +175,8 @@ class _LoginScreenState extends State<LoginScreen> {
             Positioned(
               bottom: 0,
               left: 0,
-              child: Image.network(
-                'http://stock.cslancer.com/images/Vector2.png',
+              child: Image.asset(
+                'assets/images/Vector2.png',
                 width: ScreenUtil.setWidth(200),
               ),
             ),
@@ -171,8 +197,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   SizedBox(height: ScreenUtil.setHeight(50)),
                   Center(
-                    child: Image.network(
-                      'http://stock.cslancer.com/images/login.png',
+                    child: Image.asset(
+                      'assets/images/login.png',
                       height: ScreenUtil.setHeight(150),
                     ),
                   ),
@@ -227,72 +253,28 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   SizedBox(height: ScreenUtil.setHeight(20)),
-                  // Align(
-                  //   alignment: Alignment.centerRight,
-                  //   child: TextButton(
-                  //     onPressed: () {
-                  //       // Forgot password logic can be implemented here
-                  //     },
-                  //     child: Text(
-                  //       'Forgot Password?',
-                  //       style: TextStyle(
-                  //         color: Colors.purple,
-                  //         fontSize: ScreenUtil.setSp(16),
-                  //         fontWeight: FontWeight.w600,
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                  // SizedBox(height: ScreenUtil.setHeight(5)),
-          SizedBox(
-            width: double.infinity,
-            height: ScreenUtil.setHeight(50),
-            child: Button(
-              onPressed: _isButtonEnabled
-                  ? () => _login()
-                  : () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      "Please fill in your credentials.",
-                      style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
+                  SizedBox(
+                    width: double.infinity,
+                    height: ScreenUtil.setHeight(50),
+                    child: Button(
+                      onPressed: _isButtonEnabled ? () => _login() : () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Please fill in your credentials.",
+                              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
+                            ),
+                            backgroundColor: Colors.purple,
+                            behavior: SnackBarBehavior.floating,
+                            margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      text: _isLoading ? 'Logging in...' : 'Log In',
                     ),
-                    backgroundColor: Colors.purple, // Customize background color
-                    behavior: SnackBarBehavior.floating, // Makes the SnackBar float
-                    margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0), // Adds margin around the SnackBar
-                    duration: Duration(seconds: 2), // Set the duration of the SnackBar
                   ),
-                );
-              },
-              text: _isLoading ? 'Logging in...' : 'Log In',
-            ),
-          ),
                   SizedBox(height: ScreenUtil.setHeight(8)),
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.center,
-                  //   children: [
-                  //     Text(
-                  //       "Don't have an account?",
-                  //       style: TextStyle(
-                  //         fontSize: ScreenUtil.setSp(22),
-                  //         fontWeight: FontWeight.w600,
-                  //       ),
-                  //     ),
-                      // TextButton(
-                      //   onPressed: () {
-                      //     Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUpScreen()));
-                      //   },
-                      //   child: Text(
-                      //     'Sign up',
-                      //     style: TextStyle(
-                      //       color: Colors.purple,
-                      //       fontSize: ScreenUtil.setSp(22),
-                      //       fontWeight: FontWeight.w600,
-                      //     ),
-                      //   ),
-                      // ),
-                  //   ],
-                  // ),
                   SizedBox(height: ScreenUtil.setHeight(210)),
                 ],
               ),

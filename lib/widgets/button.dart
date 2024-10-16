@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stock_managment/utils/screen_util.dart';
 
 class Button extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final String text;
   final double? width; // Add a width parameter
   final Widget? leadingIcon; // Add an optional leading icon

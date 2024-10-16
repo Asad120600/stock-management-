@@ -21,7 +21,7 @@ class _AddIngredientsUnitScreenState extends State<AddIngredientsUnitScreen> {
   final TokenService _tokenService = TokenService(); // Initialize TokenService
 
   Future<void> _addUnit() async {
-    final String apiUrl = 'https://stock.cslancer.com/api/units';
+    const String apiUrl = 'https://stock.cslancer.com/api/units';
 
     // Retrieve the token
     final token = await _tokenService.getToken();
@@ -33,7 +33,7 @@ class _AddIngredientsUnitScreenState extends State<AddIngredientsUnitScreen> {
     if (token == null) {
       log('Token is null. Please log in to continue.');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('You need to log in again.')),
+        const SnackBar(content: Text('You need to log in again.')),
       );
       return; // Exit early if token is null
     }
@@ -60,24 +60,32 @@ class _AddIngredientsUnitScreenState extends State<AddIngredientsUnitScreen> {
       );
 
       log('Response status: ${response.statusCode}');
-      log('Response body: ${response.body ?? 'No response'}');
+      log('Response body: ${response.body}');
 
       if (response.statusCode == 201) {
         log("Unit Added: ${_unitNameController.text}");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Unit added successfully!')),
+          const SnackBar(content: Text('Unit added successfully!')),
         );
         _unitNameController.clear();
 
         // Navigate to the Dashboard screen
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => DashboardScreen()),
+          MaterialPageRoute(builder: (context) => const DashboardScreen()),
         );
-      } else {
-        log("Failed to add unit: ${response.body ?? 'No response'}");
+      } else if (response.statusCode == 500) {
+        log("Failed to add unit: ${response.body }");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to add unit: ${response.body ?? 'No response'}')),
+          const SnackBar(content: Text('Unit Already Exists')),
+        );
+
+
+      }
+      else {
+        log("Failed to add unit: ${response.body}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add unit: ${response.body}')),
         );
       }
     } catch (e) {

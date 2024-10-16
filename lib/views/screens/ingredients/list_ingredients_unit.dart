@@ -108,7 +108,7 @@ class _ListIngredientsUnitScreenState extends State<ListIngredientsUnitScreen> {
       log('Delete response status: ${response.statusCode}');
       log('Delete response body: ${response.body}');
 
-      if (response.statusCode == 200 || response.statusCode == 204) {
+      if (response.statusCode == 204) {
         // Successfully deleted, remove the unit from the list
         setState(() {
           units.removeWhere((unit) => unit['id'] == unitId);
@@ -157,16 +157,16 @@ class _ListIngredientsUnitScreenState extends State<ListIngredientsUnitScreen> {
           padding: EdgeInsets.all(ScreenUtil.setWidth(16)),
           child: Column(
             children: [
-              // Loading Indicator
               if (isLoading)
-                const Center(
-                  child: SpinKitFadingCircle(
-                    color: Colors.purple,
-                    size: 50.0,
+                Expanded(
+                  child: Center(
+                    child: SpinKitFadingCircle(
+                      color: Colors.purple,
+                      size: 50.0,
+                    ),
                   ),
                 )
               else
-                // List of units
                 Expanded(
                   child: ListView.builder(
                     itemCount: units.length,
@@ -177,8 +177,7 @@ class _ListIngredientsUnitScreenState extends State<ListIngredientsUnitScreen> {
                       log('Unit data: ${unit.toString()}');
 
                       return CommonListItem(
-                        title: unit['name'] ??
-                            'Unnamed', // Use null-aware operator
+                        title: unit['name'] ?? 'Unnamed', // Use null-aware operator
                         onEdit: () {
                           print('Edit tapped for ${unit['name']}');
                           // Add your edit logic here

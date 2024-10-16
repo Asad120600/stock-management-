@@ -96,7 +96,7 @@ class _ListSupplierScreenState extends State<ListSupplierScreen> {
       },
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 204) {
       // Successfully deleted supplier
       setState(() {
         suppliers.removeWhere((supplier) => supplier['id'] == id); // Remove supplier from the list
@@ -145,19 +145,6 @@ class _ListSupplierScreenState extends State<ListSupplierScreen> {
         padding: EdgeInsets.all(ScreenUtil.setWidth(16)),
         child: Column(
           children: [
-            // Search Bar
-            TextFormField(
-              controller: searchController,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search),
-                labelText: 'Search',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(ScreenUtil.setWidth(20)),
-                ),
-              ),
-            ),
-            SizedBox(height: ScreenUtil.setHeight(16)),
-
             // List of suppliers with pull-to-refresh
             Expanded(
               child: isLoading // Check if loading

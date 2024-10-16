@@ -32,7 +32,7 @@ class _ListIngredientsScreenState extends State<ListIngredientsScreen> {
     try {
       final token = await _tokenService.getToken();
       final response = await http.get(
-        Uri.parse('http://stock.cslancer.com/api/units'), // Your units API endpoint
+        Uri.parse('s://stock.cslancer.com/api/units'), // Your units API endpoint
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
@@ -55,7 +55,7 @@ class _ListIngredientsScreenState extends State<ListIngredientsScreen> {
   Future<void> fetchIngredients() async {
     final token = await _tokenService.getToken(); // Retrieve your token from the token service
     final response = await http.get(
-      Uri.parse('http://stock.cslancer.com/api/ingredients'),
+      Uri.parse('https://stock.cslancer.com/api/ingredients'),
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
@@ -80,7 +80,7 @@ class _ListIngredientsScreenState extends State<ListIngredientsScreen> {
   Future<void> deleteIngredient(int ingredientId) async {
     final token = await _tokenService.getToken(); // Retrieve your token from the token service
     final response = await http.delete(
-      Uri.parse('http://stock.cslancer.com/api/ingredients/$ingredientId'),
+      Uri.parse('https://stock.cslancer.com/api/ingredients/$ingredientId'),
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
@@ -140,17 +140,6 @@ class _ListIngredientsScreenState extends State<ListIngredientsScreen> {
           onRefresh: _refreshIngredients,
           child: Column(
             children: [
-              // Search bar
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: ScreenUtil.setHeight(16)),
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    hintText: "Search",
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
               // Ingredient cards
               Expanded(
                 child: ListView.builder(

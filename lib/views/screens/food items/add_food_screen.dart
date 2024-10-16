@@ -75,7 +75,7 @@ class _AddFoodMenuScreenState extends State<AddFoodMenuScreen> {
     try {
       final token = await _tokenService.getToken();
       final response = await http.get(
-        Uri.parse('http://stock.cslancer.com/api/ingredients'),
+        Uri.parse('https://stock.cslancer.com/api/ingredients'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',

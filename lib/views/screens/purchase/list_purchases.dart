@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:stock_managment/utils/screen_util.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 import 'package:stock_managment/widgets/popup_menu.dart';
@@ -31,7 +32,7 @@ class _ListPurchaseScreenState extends State<ListPurchaseScreen> {
   Future<void> fetchPurchases() async {
     final token = await _tokenService.getToken(); // Get the token for authorization
     final response = await http.get(
-      Uri.parse('http://stock.cslancer.com/api/purchases'), // Purchase API endpoint
+      Uri.parse('https://stock.cslancer.com/api/purchases'), // Purchase API endpoint
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
@@ -74,7 +75,7 @@ class _ListPurchaseScreenState extends State<ListPurchaseScreen> {
   // Function to fetch unit names
   Future<Map<int, String>> fetchUnits(String token) async {
     final response = await http.get(
-      Uri.parse('http://stock.cslancer.com/api/units'), // API endpoint for units
+      Uri.parse('https://stock.cslancer.com/api/units'), // API endpoint for units
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
@@ -92,7 +93,7 @@ class _ListPurchaseScreenState extends State<ListPurchaseScreen> {
   // Function to fetch ingredient names
   Future<Map<String, String>> fetchIngredients(String token) async {
     final response = await http.get(
-      Uri.parse('http://stock.cslancer.com/api/ingredients'), // API endpoint for ingredients
+      Uri.parse('https://stock.cslancer.com/api/ingredients'), // API endpoint for ingredients
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
@@ -111,7 +112,7 @@ class _ListPurchaseScreenState extends State<ListPurchaseScreen> {
     try {
       final token = await _tokenService.getToken(); // Get the token for authorization
       final response = await http.delete(
-        Uri.parse('http://stock.cslancer.com/api/purchases/$purchaseId'), // DELETE endpoint with purchase ID
+        Uri.parse('https://stock.cslancer.com/api/purchases/$purchaseId'), // DELETE endpoint with purchase ID
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
@@ -197,7 +198,10 @@ class _ListPurchaseScreenState extends State<ListPurchaseScreen> {
           children: [
             Expanded(
               child: isLoadingPurchases
-                  ? const Center(child: CircularProgressIndicator()) // Show a loading indicator
+                  ? const Center(child: SpinKitFadingCircle(
+                size: 50,
+                color: Colors.purple,
+              )) // Show a loading indicator
                   : ListView.builder(
                 itemCount: purchases.length,
                 itemBuilder: (context, index) {

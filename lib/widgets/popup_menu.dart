@@ -12,35 +12,40 @@ class PopupMenuWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8), // Adding border radius
+    return PopupMenuButton<int>(
+      icon: const Icon(Icons.more_vert, color: Colors.black),
+      onSelected: (value) {
+        if (value == 1) {
+          onEdit();
+        } else if (value == 2) {
+          onDelete();
+        }
+      },
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12), // Circular shape
       ),
-      child: PopupMenuButton<int>(
-        icon: const Icon(Icons.more_vert),
-        onSelected: (value) {
-          if (value == 1) {
-            onEdit();
-          } else if (value == 2) {
-            onDelete();
-          }
-        },
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12), // Adding border radius to the popup itself
-        ),
-        itemBuilder: (context) => [
-          const PopupMenuItem(
-            value: 2,
-            child: Row(
-              children: [
-                Icon(Icons.delete, color: Colors.black54),
-                SizedBox(width: 8),
-                Text("Delete"),
-              ],
-            ),
+      itemBuilder: (context) => [
+        const PopupMenuItem(
+          value: 1,
+          child: Row(
+            children: [
+              Icon(Icons.edit, color: Colors.black54), // Edit icon
+              SizedBox(width: 8),
+              Text("Edit"),
+            ],
           ),
-        ],
-      ),
+        ),
+        const PopupMenuItem(
+          value: 2,
+          child: Row(
+            children: [
+              Icon(Icons.delete, color: Colors.red), // Delete icon with red color
+              SizedBox(width: 8),
+              Text("Delete"),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
