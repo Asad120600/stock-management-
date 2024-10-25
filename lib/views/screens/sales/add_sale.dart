@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart'; // Required for SharedPreferences
 import 'package:stock_managment/services/token_service.dart';
 import 'package:stock_managment/utils/screen_util.dart';
 import 'package:stock_managment/widgets/button.dart';
@@ -17,11 +16,13 @@ class AddSales extends StatefulWidget {
 
 class _AddSalesState extends State<AddSales> {
   final _formKey = GlobalKey<FormState>();
-  final TokenService _tokenService = TokenService(); // Create an instance of TokenService
+  final TokenService _tokenService = TokenService();
 
   int? _categoryId;
   int? _menuItemId;
   int? _quantityOfSale;
+  double? _totalAmount; // New field for total amount spent
+  double? _itemPrice; // Field to store the price of the selected menu item
 
   List<dynamic> categories = [];
   List<dynamic> menuItems = [];
@@ -58,7 +59,7 @@ class _AddSalesState extends State<AddSales> {
     final response = await http.get(
       Uri.parse('https://stock.cslancer.com/api/food-items'),
       headers: {
-        'Authorization': 'Bearer ${await _tokenService.getToken()}', // Use TokenService to get token
+        'Authorization': 'Bearer ${await _tokenService.getToken()}',
       },
     );
 
@@ -67,7 +68,6 @@ class _AddSalesState extends State<AddSales> {
         menuItems = jsonDecode(response.body);
       });
     } else {
-      // Print error details for debugging
       print('Failed to load food items: ${response.statusCode} ${response.body}');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to load food items: ${response.body}')),
@@ -75,20 +75,38 @@ class _AddSalesState extends State<AddSales> {
     }
   }
 
+  void _calculateTotalAmount() {
+    if (_quantityOfSale != null && _quantityOfSale! > 0 && _itemPrice != null && _itemPrice! > 0.0) {
+      setState(() {
+        _totalAmount = _quantityOfSale! * _itemPrice!;
+        print(_totalAmount);
+      });
+    } else {
+      setState(() {
+        _totalAmount = 0.0; // Set default to 0.0 if values are invalid
+      });
+    }
+  }
+
+
   Future<void> addItem() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
     _formKey.currentState!.save();
 
-    // Prepare the data for the API
+    // Prepare the data for the API, including total_amount_of_sale
     final data = {
       "category_id": _categoryId.toString(),
       "food_item_id": _menuItemId.toString(),
       "quantity": _quantityOfSale.toString(),
+      "total_amount_of_sale": _totalAmount?.toStringAsFixed(2) ?? '0.00', // total_amount as string
     };
 
-    // Use TokenService to get the token for the request
+    // Debugging: Print the data to be sent to the API
+    print('Data to be sent: $data');
+
+    // Use TokenService to get the token
     String token = await _tokenService.getToken() ?? '';
 
     // Send a POST request to the API
@@ -101,17 +119,19 @@ class _AddSalesState extends State<AddSales> {
       body: jsonEncode(data),
     );
 
+    // Debugging: Log the response status code and body
+    print('Response Status Code: ${response.statusCode}');
+    print('Response Body: ${response.body}');
+
     if (response.statusCode == 201) {
-      // Successfully added the item
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Item added successfully.')),
       );
       Navigator.pop(context);
     } else {
-      // Print error details for debugging
-      print('Failed to add item: ${response.statusCode} ${response.body}');
+      print('Failed to add sale: ${response.statusCode} ${response.body}');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add item: ${response.body}')),
+        SnackBar(content: Text('Failed to add sale: ${response.body}')),
       );
     }
   }
@@ -125,7 +145,7 @@ class _AddSalesState extends State<AddSales> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          'Add Item',
+          'Add Sale ',
           style: TextStyle(
             fontSize: ScreenUtil.setSp(22),
             fontWeight: FontWeight.w700,
@@ -152,8 +172,6 @@ class _AddSalesState extends State<AddSales> {
                 textAlign: TextAlign.left,
               ),
               SizedBox(height: ScreenUtil.setHeight(16)),
-
-              // Category dropdown
               _buildLabel('Category:'),
               DropdownButtonFormField<int>(
                 decoration: const InputDecoration(border: OutlineInputBorder()),
@@ -173,7 +191,6 @@ class _AddSalesState extends State<AddSales> {
               ),
               SizedBox(height: ScreenUtil.setHeight(16)),
 
-              // Menu Item dropdown
               _buildLabel('Menu Item:'),
               DropdownButtonFormField<int>(
                 decoration: const InputDecoration(border: OutlineInputBorder()),
@@ -186,24 +203,51 @@ class _AddSalesState extends State<AddSales> {
                 onChanged: (value) {
                   setState(() {
                     _menuItemId = value;
+
+                    // Safely access the price and handle potential null or missing values
+                    var selectedItem = menuItems.firstWhere((item) => item['id'] == value, orElse: () => null);
+
+                    if (selectedItem != null) {
+                      // Parse sale_price as double, if it fails, default to 0.0
+                      _itemPrice = double.tryParse(selectedItem['sale_price']) ?? 0.0;
+                      // Debugging: Log the selected item and its parsed price
+                      print('Selected Menu Item: ${selectedItem['name']}');
+                      print('Parsed Price: $_itemPrice');
+                    } else {
+                      print('No item found with id $value');
+                      _itemPrice = 0.0;
+                    }
+
+                    // Calculate total if both price and quantity are set
+                    _calculateTotalAmount();
                   });
                 },
                 validator: (value) => value == null ? 'Please select a menu item' : null,
                 onSaved: (value) => _menuItemId = value,
               ),
               SizedBox(height: ScreenUtil.setHeight(16)),
-
-              // Quantity of sale field
               _buildLabel('Quantity of Sale:'),
               TextFormField(
                 decoration: const InputDecoration(border: OutlineInputBorder()),
                 keyboardType: TextInputType.number,
                 validator: (value) => value == null || value.isEmpty ? 'Please enter a quantity' : null,
-                onSaved: (value) => _quantityOfSale = int.tryParse(value!),
+                onChanged: (value) {
+                  setState(() {
+                    _quantityOfSale = int.tryParse(value) ?? 0;
+                    _calculateTotalAmount(); // Recalculate total when the quantity changes
+                  });
+                },
+              ),
+              SizedBox(height: ScreenUtil.setHeight(16)),
+              _buildLabel('Total Amount:'),
+              Text(
+                _totalAmount != null && _totalAmount! > 0 ? '${_totalAmount!.toStringAsFixed(2)}' : 'N/A',
+                style: TextStyle(
+                  fontSize: ScreenUtil.setSp(18),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               SizedBox(height: ScreenUtil.setHeight(32)),
-
-              // Save Item Button
               Button(onPressed: addItem, text: 'Save'),
             ],
           ),

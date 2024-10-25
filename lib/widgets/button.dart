@@ -30,7 +30,6 @@ class Button extends StatelessWidget {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center, // Center the content
-          mainAxisSize: MainAxisSize.min, // Adapt to content size
           children: [
             if (leadingIcon != null) ...[
               leadingIcon!, // Display icon if it's provided
@@ -39,7 +38,7 @@ class Button extends StatelessWidget {
             Text(
               text, // Use the customizable text
               style: TextStyle(
-                fontSize: ScreenUtil.setSp(15), // Scale text size
+                fontSize: ScreenUtil.setSp(13), // Scale text size
                 color: Colors.white,
               ),
             ),

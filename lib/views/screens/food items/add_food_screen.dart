@@ -264,13 +264,13 @@ class _AddFoodMenuScreenState extends State<AddFoodMenuScreen> {
                       flex: 3,
                       child: _buildTextField(controller: _salePriceController, label: "Sale Price *"),
                     ),
-                    SizedBox(width: ScreenUtil.setWidth(12)),
+                    SizedBox(width: ScreenUtil.setWidth(12)), // Space between the text field and button
                     Expanded(
-                      flex: 2,
+                      flex: 2, // Adjust flex to balance space distribution
                       child: Button(
+                        width: 100,
                         onPressed: _createFoodItem,
                         text: "Add Food Item",
-                        width: double.infinity,
                       ),
                     ),
                   ],

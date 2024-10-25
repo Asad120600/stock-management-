@@ -8,18 +8,20 @@ class SalesCard extends StatelessWidget {
   final String qty;
   final String foodItem;
   final String category;
+  final String total_amount_of_sale;
   final bool isSelected;
-  final int saleId; // Sale ID for deletion
-  final Function onDeleteSuccess; // Callback when delete is successful
+  final int saleId;
+  final Function onDeleteSuccess;
 
   const SalesCard({
     super.key,
     required this.category,
     this.isSelected = false,
     required this.foodItem,
+    required this.total_amount_of_sale,
     required this.qty,
-    required this.saleId, // Ensure saleId is passed
-    required this.onDeleteSuccess, // Ensure onDeleteSuccess is passed
+    required this.saleId,
+    required this.onDeleteSuccess,
   });
 
   @override
@@ -39,16 +41,15 @@ class SalesCard extends StatelessWidget {
                   _buildInfoRow('Category', category),
                   _buildInfoRow('Food Item', foodItem),
                   _buildInfoRow('Quantity', qty),
+                  _buildInfoRow('Total Amount', total_amount_of_sale),
                 ],
               ),
             ),
             PopupMenuWidget(
               onEdit: () {
-                // Handle the edit action
                 print('Edit action selected for $foodItem');
               },
               onDelete: () {
-                // Handle the delete action
                 _showDeleteConfirmation(context);
               },
             ),
@@ -56,55 +57,6 @@ class SalesCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void _showDeleteConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirm Delete'),
-          content: const Text('Are you sure you want to delete this sale?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                await _deleteSale(); // Call the delete function
-                onDeleteSuccess(); // Call the onDeleteSuccess callback
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Delete'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _deleteSale() async {
-    // Assume you have a TokenService to get the token
-    final tokenService = TokenService();
-    final token = await tokenService.getToken(); // Get the token
-
-    final response = await http.delete(
-      Uri.parse('https://stock.cslancer.com/api/sales/$saleId'),
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
-    );
-
-    if (response.statusCode == 204) {
-      // Successfully deleted
-      print('Sale deleted successfully.');
-    } else {
-      // Handle error
-      print('Failed to delete sale: ${response.statusCode} - ${response.body}');
-    }
   }
 
   Widget _buildInfoRow(String label, String value) {
@@ -123,5 +75,51 @@ class SalesCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Delete'),
+          content: const Text('Are you sure you want to delete this sale?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await _deleteSale();
+                onDeleteSuccess();
+                Navigator.of(context).pop();
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteSale() async {
+    final tokenService = TokenService();
+    final token = await tokenService.getToken();
+
+    final response = await http.delete(
+      Uri.parse('https://stock.cslancer.com/api/sales/$saleId'),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 204) {
+      print('Sale deleted successfully.');
+    } else {
+      print('Failed to delete sale: ${response.statusCode} - ${response.body}');
+    }
   }
 }

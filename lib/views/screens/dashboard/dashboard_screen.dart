@@ -26,8 +26,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String totalAmountSpent = " "; // Total amount spent
   int totalItems = 0; // Total items count
   bool _isLoading = false;
-  List<dynamic>? _reportData;
   List<Map<String, dynamic>> _ingredients = [];
+  Map<String, dynamic> _report = {
+    'ingredients_report': [],
+    'financial_report': {}
+  };
 
 
   //Function to fetch ingredients with authentication
@@ -84,71 +87,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.didChangeDependencies();
     // You can now use _showSnackBar safely here if needed
   }
-  // Updated fetchReport method without date validation
-  Future<void> _fetchReport() async {
-    // Ensure start and end dates are non-null
-    if (_startDate == null || _endDate == null) {
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final token = await _tokenService.getToken();
-
-      if (token == null) {
-        _showSnackBar('Access token is not available.');
-        return;
-      }
-
-      // Safely format the dates only if they are not null
-      final String formattedStartDate = DateFormat('yyyy-MM-dd').format(_startDate!);
-      final String formattedEndDate = DateFormat('yyyy-MM-dd').format(_endDate!);
-
-      final response = await http.get(
-        Uri.parse(
-          'https://stock.cslancer.com/api/dashboard/report?from=$formattedStartDate&to=$formattedEndDate',
-        ),
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        // Parse the response directly as a List
-        final List<dynamic> reportList = json.decode(response.body);
-        log(reportList.toString()); // Log the report data to see its structure
-
-        // Assuming the first element of the list contains the relevant data
-        if (reportList.isNotEmpty) {
-          setState(() {
-            _reportData = reportList.map((report) {
-              return {
-                'ingredient_id': report['ingredient_id'],
-                'total_quantity': report['total_quantity'],
-                'total_consumed': report['total_consumed'],
-                'total_remaining': report['total_remaining'],
-              };
-            }).toList();
-          });
-        } else {
-          throw Exception('No data found for the selected dates.');
-        }
-      } else {
-        throw Exception('Failed to load report: ${response.reasonPhrase}');
-      }
-    } catch (e) {
-      log('Error loading report: ${e.toString()}');
-      _showSnackBar('No Reports Found For Selected Dates ');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-  // select date
   Future<void> _selectDate(BuildContext context, {required bool isStartDate}) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -167,7 +105,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
     }
   }
-  // fetch username
+
+  // Update the _fetchReport method to parse your JSON response structure
+  Future<void> _fetchReport() async {
+    if (_startDate == null || _endDate == null) {
+      // _showSnackBar('Please select both start and end dates.');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      String? token = await _tokenService.getToken();
+      String fromDate = DateFormat('yyyy-MM-dd').format(_startDate!);
+      String toDate = DateFormat('yyyy-MM-dd').format(_endDate!);
+
+      final response = await http.get(
+        Uri.parse('https://stock.cslancer.com/api/dashboard/report?from=$fromDate&to=$toDate'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final body = response.body;
+        if (body.isNotEmpty) {
+          final data = json.decode(body);
+          log('Parsed Data: $data');
+
+          // Check if data is a Map and contains the expected keys
+          if (data is Map<String, dynamic> && data.containsKey('ingredients_report') && data.containsKey('financial_report')) {
+            setState(() {
+              _report = data; // Set report data directly as it is already a Map
+            });
+          } else {
+            _showSnackBar("No data found or unexpected format.");
+          }
+        }
+      } else {
+        _showSnackBar("Failed to fetch report. Error: ${response.statusCode}");
+      }
+    } catch (e) {
+      log("Error fetching report: $e");
+      _showSnackBar("Error fetching report: $e");
+    } finally {
+      setState(() {
+        _isLoading = false; // Reset loading state
+      });
+    }
+  }
   Future<void> fetchUserName() async {
     final prefs = await SharedPreferences.getInstance();
     final email = prefs.getString('email'); // Get the email
@@ -368,10 +357,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-
-
-
+// Update the _buildReportSection method to display your parsed JSON data
   Widget _buildReportSection() {
+    final ingredientsReport = _report['ingredients_report'] ?? [];
+    final financialReport = _report['financial_report'] ?? {};
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -410,11 +400,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             child: _isLoading
-                ? const LoadingDots()
+                ? const LoadingDots(color: Colors.purple)
                 : const Text('Get Report', style: TextStyle(color: Colors.white)),
           ),
         ),
-        if (_reportData != null) ...[
+        // Display the financial report date range if it exists
+        if (financialReport.isNotEmpty) ...[
+          SizedBox(height: ScreenUtil.setHeight(10)),
+          Center(
+            child: Text(
+              'Financial Report\nFrom ${DateFormat('dd/MM/yyyy').format(_startDate!)} To ${DateFormat('dd/MM/yyyy').format(_endDate!)}',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: ScreenUtil.setSp(18)),
+            ),
+          ),
+          SizedBox(height: ScreenUtil.setHeight(10)),
+          _buildFinancialReport(financialReport),
+        ],
+        // Ensure the report section is displayed only if there is data
+        if (ingredientsReport.isNotEmpty) ...[
           SizedBox(height: ScreenUtil.setHeight(10)),
           Center(
             child: Text(
@@ -427,16 +431,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: _reportData!.length,
+            itemCount: ingredientsReport.length,
             itemBuilder: (context, index) {
-              final item = _reportData![index];
+              final item = ingredientsReport[index];
               String ingredientName = _getIngredientName(item['ingredient_id']);
               int ingredientId = item['ingredient_id']; // Get the ingredient ID
 
               // Ensure that these values are accessed safely
-              String totalQuantity = item['total_quantity'] != null ? item['total_quantity'].toString() : 'N/A';
-              String totalConsumed = item['total_consumed'] != null ? item['total_consumed'].toString() : 'N/A';
-              String totalRemaining = item['total_remaining'] != null ? item['total_remaining'].toString() : 'N/A';
+              String totalQuantity = item['total_quantity']?.toString() ?? 'N/A';
+              String totalConsumed = item['total_consumed']?.toString() ?? 'N/A';
+              String totalRemaining = item['total_remaining']?.toString() ?? 'N/A';
 
               return Padding(
                 padding: EdgeInsets.symmetric(vertical: ScreenUtil.setHeight(8)),
@@ -491,12 +495,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
               );
             },
           ),
-          SizedBox(height: ScreenUtil.setHeight(10)),
         ],
       ],
     );
   }
 
+// Build the financial report section
+  Widget _buildFinancialReport(Map<String, dynamic> financialReport) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(ScreenUtil.setWidth(15)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade300,
+            blurRadius: ScreenUtil.setWidth(5),
+            offset: Offset(0, ScreenUtil.setHeight(5)),
+          ),
+        ],
+      ),
+      padding: EdgeInsets.all(ScreenUtil.setWidth(12)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Financial Report',
+            style: TextStyle(fontSize: ScreenUtil.setSp(16), fontWeight: FontWeight.w600),
+          ),
+          SizedBox(height: ScreenUtil.setHeight(8)), // Add spacing between title and rows
+          _buildReportRow('Total Sale', financialReport['total_sale'].toString()),
+          _buildReportRow('Total Purchase', financialReport['total_purchase'].toString()),
+          _buildReportRow('Total Profit', financialReport['total_profit'].toString()),
+          _buildReportRow(
+            'Profit Percentage',
+            '${financialReport['total_profit_percentage'].toStringAsFixed(2)}%', // Correctly formatted
+            isRed: financialReport['total_profit_percentage'] < 0,
+          ),
+        ],
+      ),
+    );
+  }
+
+// Reusable report row for displaying title-value pairs
   Widget _buildReportRow(String title, String value, {bool isRed = false}) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: ScreenUtil.setHeight(4)),
@@ -519,8 +559,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-
-  // date Field
+// Date field widget
   Widget _buildDateField({
     required BuildContext context,
     required String hintText,
@@ -549,6 +588,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
+
+
+
   Widget _buildStatCard(BuildContext context, {
     required String title,
     required String value,

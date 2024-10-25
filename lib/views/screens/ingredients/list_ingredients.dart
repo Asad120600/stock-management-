@@ -32,7 +32,7 @@ class _ListIngredientsScreenState extends State<ListIngredientsScreen> {
     try {
       final token = await _tokenService.getToken();
       final response = await http.get(
-        Uri.parse('s://stock.cslancer.com/api/units'), // Your units API endpoint
+        Uri.parse('https://stock.cslancer.com/api/units'), // Your units API endpoint
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',

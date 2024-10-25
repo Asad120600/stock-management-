@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'package:stock_managment/services/token_service.dart'; // To get the token
-import 'package:stock_managment/widgets/dots.dart';
 import 'package:stock_managment/widgets/drawer.dart';
 import 'package:stock_managment/widgets/sales_card.dart';
 
@@ -34,10 +33,8 @@ class _ListSalesScreenState extends State<ListSalesScreen> {
       _error = null; // Clear any previous errors
     });
 
-    // Get the token
-    final token = await _tokenService.getToken();
+    final token = await _tokenService.getToken(); // Get the token
 
-    // Make the API call
     final response = await http.get(
       Uri.parse('https://stock.cslancer.com/api/sales'),
       headers: {
@@ -46,17 +43,16 @@ class _ListSalesScreenState extends State<ListSalesScreen> {
     );
 
     if (response.statusCode == 200) {
-      // Parse the sales data
       List<dynamic> data = jsonDecode(response.body);
 
       // Update the sales list
       setState(() {
-        sales = data.map<Map<String, dynamic>>((item) =>
-        {
+        sales = data.map<Map<String, dynamic>>((item) => {
           "id": item['id'] ?? 0, // Default to 0 if id is null
-          "food_item": item['food_item'] ?? "Unknown",
-          "qty": item['quantity']?.toString() ?? "0",
-          "category": item['category'] ?? "Unknown",
+          "food_item": item['food_item'] ?? "Unknown", // Handle null safely
+          "qty": item['quantity']?.toString() ?? "0", // Convert quantity to string
+          "category": item['category'] ?? "Unknown", // Handle category
+          "total_amount_of_sale": item['total_amount_of_sale']?.toString() ?? "0.00", // Handle total_amount_of_sale
         }).toList();
         _isLoading = false; // Data is loaded
       });
@@ -109,6 +105,7 @@ class _ListSalesScreenState extends State<ListSalesScreen> {
                         category: sale["category"] ?? "Unknown",
                         isSelected: index % 2 == 1,
                         saleId: saleId,
+                        total_amount_of_sale: sale["total_amount_of_sale"].toString(),
                         // Pass the saleId here
                         onDeleteSuccess: () {
                           // Refresh the list after deletion
